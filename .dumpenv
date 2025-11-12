@@ -1,4 +1,0 @@
-POSTGRES_USER=todanh
-POSTGRES_PASSWORD=123
-POSTGRES_DB=my_database
-DB_HOST=database

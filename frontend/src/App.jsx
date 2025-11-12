@@ -1,6 +1,9 @@
-import './App.css'
-import Home from './pages/Home'
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom"
+import './App.css';
+import { AuthProvider } from "./contexts/authProvider";
+import Home from './pages/Home';
+import LogIn from './pages/Login';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+
 
 function AppRoutes() {
   const location = useLocation()
@@ -9,6 +12,7 @@ function AppRoutes() {
     <Routes location={location} key={location.pathname}>
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/home" element={<Home />} />
+      <Route path="/login" element={<LogIn />} />
     </Routes>
   )
 }
@@ -16,7 +20,9 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </BrowserRouter>
   )
 }
