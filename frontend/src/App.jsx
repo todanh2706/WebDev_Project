@@ -1,7 +1,7 @@
 import './App.css';
 import { AuthProvider } from "./contexts/authProvider";
 import Home from './pages/Home';
-import LogIn from './pages/Login';
+import LogIn from './pages/LogIn';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 

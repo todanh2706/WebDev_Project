@@ -1,7 +1,9 @@
 import AuthController from '../controllers/authControllers.js'
+import { authenticateToken } from '../middleware/authMiddleware.js';
 
 export default (app) => {
-    app.post('/register', AuthController.signUp);
+    app.post('/register', AuthController.register);
+    app.post('/login', AuthController.logIn);
 
     app.get('/', (req, res) => {
         res.send('Backend is running!');

@@ -1,9 +1,13 @@
 import { Model } from 'sequelize';
-
+import bcrypt from 'bcrypt';
 const PROTECTED_ATTRIBUTES = ['password'];
 
 export default (sequelize, DataTypes) => {
   class User extends Model {
+    async validPassword(password) {
+      return await bcrypt.compare(password, this.password);
+    }
+
     toJSON() {
       // hide protected fields
       const attributes = { ...this.get() };
@@ -52,6 +56,20 @@ export default (sequelize, DataTypes) => {
   }, {
     sequelize,
     modelName: 'User',
+    hooks: {
+      beforeCreate: async (user) => {
+        if (user.password) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      },
+      beforeUpdate: async (user) => {
+        if (user.changed('password')) {
+          const salt = await bcrypt.genSalt(10);
+          user.password = await bcrypt.hash(user.password, salt);
+        }
+      }
+    }
   });
   return User;
 };
