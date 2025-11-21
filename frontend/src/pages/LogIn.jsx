@@ -14,10 +14,17 @@ export default function LogIn() {
         await login(email, password);
     }
 
+    const backgroundStyle = {
+        backgroundImage: "url('/login_bg.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+    };
+
     return (
-        <div class="d-flex justify-content-center align-items-center vh-100">
-            <div class="d-flex flex-column justify-content-center align-items-center border p-4 w-50 mx-auto rounded-4">
-                <h3 >Log In</h3>
+        <div class="d-flex justify-content-center align-items-center vh-100" style={backgroundStyle}>
+            <div class="d-flex flex-column justify-content-center align-items-center border p-4 w-50 mx-auto rounded-4 border-2" style={{ background: 'hsla(0, 0%, 41%, 0.37)' }}>
+                <h1 class="text-white">Log In</h1>
                 <form onSubmit={handleSubmit} class="w-100 d-flex flex-column align-items-center">
                     <div class="form-floating mb-3 w-50">
                         <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" onChange={e => setEmail(e.target.value)} />
@@ -34,7 +41,7 @@ export default function LogIn() {
                         </div>
                         <label for="floatingPassword">Password</label>
                     </div>
-                    {error && <p class="color-red">{error}</p>}
+                    {error && <p class="text-danger">{error}</p>}
                     <button type="submit" class="btn btn-primary w-50">
                         {isLoading && <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>}
                         {isLoading ? 'Loading...' : 'Log In'}

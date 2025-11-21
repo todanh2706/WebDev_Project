@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         setIsLoading(true);
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={[user, token, isLoading, error, login]}>
+        <AuthContext.Provider value={{ user, token, isLoading, error, login }}>
             {children}
         </AuthContext.Provider>
     )
