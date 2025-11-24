@@ -26,9 +26,9 @@ export default function Home() {
                             <NavDropdown.Item href='#action/3.1'>Action</NavDropdown.Item>
                             <NavDropdown.Item href='#action/3.2'>Another action</NavDropdown.Item>
                             <NavDropdown.Divider />
-
                             <NavDropdown.Item href='#action/3.3'>Separated Link</NavDropdown.Item>
                         </NavDropdown>
+                        <Nav.Link href="/login">Log In</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>
