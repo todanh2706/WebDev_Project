@@ -1,0 +1,113 @@
+:root {
+    --auction-primary: #DAA520;
+    /* GoldenRod */
+    --auction-dark: #B8860B;
+    /* DarkGoldenRod */
+    --auction-darker: #8B6508;
+    --auction-bg: #121212;
+    --auction-surface: #1E1E1E;
+    --auction-text: #E0E0E0;
+}
+
+body {
+    background-color: var(--auction-bg);
+    color: var(--auction-text);
+    font-family: 'Inter', sans-serif;
+    /* Assuming Inter or system font */
+}
+
+.text-auction-primary {
+    color: var(--auction-primary) !important;
+}
+
+.bg-auction-primary {
+    background-color: var(--auction-primary) !important;
+}
+
+.btn-auction {
+    background: linear-gradient(45deg, var(--auction-dark), var(--auction-primary));
+    border: none;
+    color: #000;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-auction:hover {
+    background: linear-gradient(45deg, var(--auction-primary), var(--auction-dark));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);
+    color: #000;
+}
+
+.glass-panel {
+    background: rgba(30, 30, 30, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(218, 165, 32, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.form-floating>.form-control {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.form-floating>.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--auction-primary);
+    box-shadow: 0 0 0 0.25rem rgba(218, 165, 32, 0.25);
+    color: #fff;
+}
+
+.form-floating>label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-floating>.form-control:focus~label,
+.form-floating>.form-control:not(:placeholder-shown)~label {
+    color: var(--auction-primary);
+}
+
+.auction-bg-pattern {
+    background-color: var(--auction-bg);
+    background-image:
+        radial-gradient(at 0% 0%, hsla(43, 82%, 31%, 0.2) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(43, 82%, 31%, 0.2) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(43, 82%, 31%, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(43, 82%, 31%, 0.1) 0px, transparent 50%);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--auction-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--auction-dark);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--auction-primary);
+}

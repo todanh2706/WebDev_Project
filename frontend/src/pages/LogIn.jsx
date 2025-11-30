@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGavel } from "react-icons/fa";
+import Button from "../components/Button";
 
 export default function LogIn() {
     const [email, setEmail] = useState('');
@@ -14,39 +14,100 @@ export default function LogIn() {
         await login(email, password);
     }
 
-    const backgroundStyle = {
-        backgroundImage: "url('/login_bg.jpg')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-    };
-
     return (
-        <div class="d-flex justify-content-center align-items-center vh-100" style={backgroundStyle}>
-            <div class="d-flex flex-column justify-content-center align-items-center border p-4 w-50 mx-auto rounded-4 border-2" style={{ background: 'hsla(0, 0%, 41%, 0.37)' }}>
-                <h1 class="text-white">Log In</h1>
-                <form onSubmit={handleSubmit} class="w-100 d-flex flex-column align-items-center">
-                    <div class="form-floating mb-3 w-50">
-                        <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" onChange={e => setEmail(e.target.value)} />
-                        <label for="floatingInput">Email address</label>
-                    </div>
-                    <div class="form-floating mb-3 w-50">
-                        <input type={showPassword ? "text" : "password"} class="form-control" id="floatingPassword" placeholder="Password" onChange={e => setPassword(e.target.value)} />
-                        <div
-                            className="position-absolute end-0 top-50 translate-middle-y me-3"
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setShowPassword(!showPassword)}
-                        >
-                            {showPassword ? (<FaEyeSlash />) : (<FaEye />)}
+        <div className="container-fluid vh-100 auction-bg-pattern overflow-hidden">
+            <div className="row h-100">
+                {/* Left Side - Hero/Branding (Hidden on small screens, visible on lg and up) */}
+                <div className="col-lg-7 d-none d-lg-flex flex-column justify-content-center align-items-center position-relative p-0">
+                    <div className="position-absolute w-100 h-100" style={{
+                        backgroundImage: "url('/login_bg.jpg')",
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        filter: 'brightness(0.4) sepia(0.2)',
+                        zIndex: 0
+                    }}></div>
+                    <div className="position-relative z-1 text-center p-5 animate-fade-in">
+                        <div className="display-1 text-auction-primary mb-3">
+                            <FaGavel />
                         </div>
-                        <label for="floatingPassword">Password</label>
+                        <h1 className="display-3 fw-bold text-white mb-2">Premium Auction</h1>
+                        <p className="lead text-light opacity-75">Discover unique treasures. Bid with confidence.</p>
                     </div>
-                    {error && <p class="text-danger">{error}</p>}
-                    <button type="submit" class="btn btn-primary w-50">
-                        {isLoading && <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>}
-                        {isLoading ? 'Loading...' : 'Log In'}
-                    </button>
-                </form >
+                </div>
+
+                {/* Right Side - Login Form */}
+                <div className="col-lg-5 col-12 d-flex align-items-center justify-content-center p-4">
+                    <div className="glass-panel p-5 rounded-4 w-100 animate-fade-in" style={{ maxWidth: '500px' }}>
+                        <div className="text-center mb-4">
+                            <h2 className="fw-bold text-white">Welcome Back</h2>
+                            <p className="text-white-50">Sign in to access your account</p>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+                            <div className="form-floating">
+                                <input
+                                    type="email"
+                                    className="form-control"
+                                    id="floatingInput"
+                                    placeholder="name@example.com"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    required
+                                />
+                                <label htmlFor="floatingInput" className="text-auction-primary">Email address</label>
+                            </div>
+
+                            <div className="form-floating position-relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className="form-control"
+                                    id="floatingPassword"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    required
+                                />
+                                <label htmlFor="floatingPassword" className="text-auction-primary">Password</label>
+                                <div
+                                    className="position-absolute top-50 end-0 translate-middle-y me-3 text-auction-primary"
+                                    style={{ cursor: 'pointer', zIndex: 5 }}
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div className="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger" role="alert">
+                                    {error}
+                                </div>
+                            )}
+
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <div className="form-check">
+                                    <input className="form-check-input bg-dark border-secondary" type="checkbox" id="rememberMe" />
+                                    <label className="form-check-label text-white-50" htmlFor="rememberMe">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <a href="#" className="text-auction-primary text-decoration-none small">Forgot Password?</a>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                className="py-3 fs-5 rounded-3"
+                                isLoading={isLoading}
+                                loadingText="Signing in..."
+                            >
+                                Sign In
+                            </Button>
+
+                            <div className="text-center mt-4 text-white-50">
+                                Don't have an account? <a href="\register" className="text-auction-primary text-decoration-none fw-bold">Sign up</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     );

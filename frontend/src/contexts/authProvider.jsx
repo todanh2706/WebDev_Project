@@ -50,8 +50,31 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const register = async (name, email, phone, password) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, phone, password }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.message || "Failed to register!");
+
+            // Optional: Auto-login after register or just return success
+            return true;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, error, login }}>
+        <AuthContext.Provider value={{ user, token, isLoading, error, login, register }}>
             {children}
         </AuthContext.Provider>
     )

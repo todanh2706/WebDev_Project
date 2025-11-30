@@ -2,6 +2,7 @@ import './App.css';
 import { AuthProvider } from "./contexts/authProvider";
 import Home from './pages/Home';
 import LogIn from './pages/LogIn';
+import Register from './pages/Register';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 
 
@@ -13,6 +14,7 @@ function AppRoutes() {
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/home" element={<Home />} />
       <Route path="/login" element={<LogIn />} />
+      <Route path="/register" element={<Register />} />
     </Routes>
   )
 }

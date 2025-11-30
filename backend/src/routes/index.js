@@ -12,7 +12,7 @@ export default (app) => {
     // Create a catch-all route for testing the installation.
     app.use((req, res, next) => {
         res.status(404).send({
-            message: "Sorry, can't find that!"
+            message: "Not found!"
         });
     });
 }
