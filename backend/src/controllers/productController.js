@@ -16,7 +16,8 @@ const ProductController = {
                 order: [
                     [{ model: Bid, as: 'bids' }, 'createdAt', 'DESC']
                 ],
-                limit: 5
+                limit: 5,
+                subQuery: false
             });
             res.json(products);
         } catch (error) {

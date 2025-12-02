@@ -13,43 +13,51 @@ const ProductCard = ({ product }) => {
     };
 
     return (
-        <Card className="h-100 border-0 glass-panel text-white overflow-hidden">
-            <div className="position-relative" style={{ height: '200px' }}>
+        <Card className="h-100 border-0 glass-panel-dark text-white overflow-hidden">
+            <div className="position-relative" style={{ height: '220px' }}>
                 <Card.Img
                     variant="top"
                     src={imageUrl}
                     className="w-100 h-100 object-fit-cover"
+                    style={{ transition: 'transform 0.5s ease' }}
                 />
-                <div className="position-absolute top-0 end-0 p-2">
-                    <span className="badge bg-dark bg-opacity-75 backdrop-blur">
-                        <FaClock className="me-1 text-auction-primary" />
+                <div className="position-absolute top-0 end-0 p-3">
+                    <span className="badge bg-black bg-opacity-75 backdrop-blur border border-secondary border-opacity-25 py-2 px-3 rounded-md">
+                        <FaClock className="me-2 text-auction-primary" />
                         {formatTimeLeft(endTime)}
                     </span>
                 </div>
+                {/* Gradient Overlay */}
+                <div className="position-absolute bottom-0 start-0 w-100"
+                    style={{ height: '50%', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
+                </div>
             </div>
-            <Card.Body className="d-flex flex-column">
-                <Card.Title className="h5 mb-3 text-truncate" title={name}>
+            <Card.Body className="d-flex flex-column p-4">
+                <Card.Title className="h5 mb-1 text-truncate fw-bold" title={name}>
                     {name}
                 </Card.Title>
+                <div className="mb-4">
+                    <small className="text-white-50">Lot #10{product.id}</small>
+                </div>
 
                 <div className="mt-auto">
-                    <div className="d-flex justify-content-between align-items-end mb-3">
+                    <div className="d-flex justify-content-between align-items-end mb-4 p-3 rounded-md bg-black bg-opacity-25 border border-white border-opacity-10">
                         <div>
-                            <small className="text-white-50 d-block mb-1">Current Bid</small>
-                            <span className="h4 text-auction-primary mb-0">
+                            <small className="text-white-50 d-block mb-1 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Current Bid</small>
+                            <span className="h3 text-auction-primary mb-0 fw-bold">
                                 ${parseFloat(currentPrice).toLocaleString()}
                             </span>
                         </div>
                         {bidCount !== undefined && (
                             <div className="text-end">
-                                <small className="text-white-50 d-block mb-1">Bids</small>
-                                <span className="fw-bold">{bidCount}</span>
+                                <small className="text-white-50 d-block mb-1 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Bids</small>
+                                <span className="fw-bold fs-5">{bidCount}</span>
                             </div>
                         )}
                     </div>
 
-                    <Button className="w-100 d-flex align-items-center justify-content-center gap-2">
-                        <FaGavel /> Bid Now
+                    <Button className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm">
+                        <FaGavel /> Place Bid
                     </Button>
                 </div>
             </Card.Body>

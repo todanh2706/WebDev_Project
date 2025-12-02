@@ -37,32 +37,28 @@ export default function Home() {
         fetchProducts();
     }, []);
 
-    // Temporary function to seed database
-    const handleSeed = async () => {
-        try {
-            await fetch(`${import.meta.env.VITE_API_BASE_URL}/seed`, { method: 'POST' });
-            window.location.reload();
-        } catch (error) {
-            console.error("Error seeding:", error);
-        }
-    };
-
     return (
-        <>
+        <div className="position-relative min-vh-100 overflow-hidden">
+            {/* Background Overlay */}
+            <div className="position-absolute top-0 start-0 w-100 h-100"
+                style={{
+                    background: 'radial-gradient(circle at center, rgba(218, 165, 32, 0.15) 0%, rgba(18, 18, 18, 0.95) 70%)',
+                    zIndex: -1,
+                    position: 'fixed' // Ensure background stays fixed while scrolling
+                }}
+            ></div>
+
+            <div className="auction-bg-pattern position-absolute top-0 start-0 w-100 h-100"
+                style={{
+                    zIndex: -2,
+                    position: 'fixed' // Ensure pattern stays fixed while scrolling
+                }}
+            ></div>
+
             <TopNavBar />
 
             {/* Hero Section */}
-            <div className="position-relative min-vh-100 d-flex align-items-center justify-content-center overflow-hidden">
-                {/* Background Overlay */}
-                <div className="position-absolute top-0 start-0 w-100 h-100"
-                    style={{
-                        background: 'radial-gradient(circle at center, rgba(218, 165, 32, 0.15) 0%, rgba(18, 18, 18, 0.95) 70%)',
-                        zIndex: -1
-                    }}
-                ></div>
-
-                <div className="auction-bg-pattern position-absolute top-0 start-0 w-100 h-100" style={{ zIndex: -2 }}></div>
-
+            <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
                 <Container className="text-center position-relative z-1 animate-fade-in">
                     <Row className="justify-content-center">
                         <Col lg={8}>
@@ -88,7 +84,14 @@ export default function Home() {
 
                             {/* Temporary Seed Button */}
                             <div className="mt-5">
-                                <button onClick={handleSeed} className="btn btn-sm btn-outline-secondary opacity-50">
+                                <button onClick={async () => {
+                                    try {
+                                        await fetch(`${import.meta.env.VITE_API_BASE_URL}/seed`, { method: 'POST' });
+                                        window.location.reload();
+                                    } catch (error) {
+                                        console.error("Error seeding:", error);
+                                    }
+                                }} className="btn btn-sm btn-outline-secondary opacity-50">
                                     Seed Database (Dev Only)
                                 </button>
                             </div>
@@ -109,6 +112,6 @@ export default function Home() {
                     </>
                 )}
             </Container>
-        </>
+        </div >
     );
 }
