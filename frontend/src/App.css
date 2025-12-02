@@ -94,13 +94,13 @@ body {
 }
 
 .animate-fade-in {
-    animation: fadeIn 0.8s ease-out forwards;
+    animation: fadeIn 0.2s ease-out forwards;
 }
 
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(10px);
     }
 
     to {
@@ -269,4 +269,94 @@ body {
     color: #000;
     box-shadow: 0 0 15px rgba(218, 165, 32, 0.5);
     transform: scale(1.1);
+}
+
+/* Mega Menu Styles */
+.mega-menu-dropdown {
+    position: static !important;
+}
+
+.mega-menu-container {
+    width: 800px;
+    background: rgba(20, 20, 20, 0.95) !important;
+    /* Increased opacity and added !important */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(218, 165, 32, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    margin-top: 15px;
+    padding: 0;
+    /* Position relative to the nav item */
+    left: 0;
+    transform: none;
+}
+
+.mega-menu-sidebar {
+    background: rgba(255, 255, 255, 0.03);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 0;
+}
+
+.mega-menu-item {
+    padding: 12px 20px;
+    color: #e0e0e0 !important;
+    /* Force text color */
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+}
+
+.mega-menu-item:hover,
+.mega-menu-item.active {
+    background: linear-gradient(90deg, rgba(218, 165, 32, 0.1), transparent);
+    color: var(--auction-primary);
+    border-left: 3px solid var(--auction-primary);
+}
+
+.mega-menu-content {
+    padding: 25px;
+}
+
+.subcategory-group {
+    padding-left: 40px !important;
+}
+
+.subcategory-group h6 {
+    color: var(--auction-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(218, 165, 32, 0.2);
+    padding-bottom: 8px;
+}
+
+.subcategory-link {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    padding: 6px 0;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.subcategory-link:hover {
+    color: #fff;
+    transform: translateX(5px);
+}
+
+.hot-badge {
+    background-color: #ff4757;
+    color: white;
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    font-weight: bold;
 }

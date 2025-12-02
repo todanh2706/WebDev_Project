@@ -6,18 +6,13 @@ const ProductController = {
     getLatestBidded: async (req, res) => {
         try {
             const products = await Product.findAll({
-                include: [{
-                    model: Bid,
-                    as: 'bids',
-                    attributes: ['createdAt'],
-                    order: [['createdAt', 'DESC']],
-                    limit: 1
-                }],
-                order: [
-                    [{ model: Bid, as: 'bids' }, 'createdAt', 'DESC']
-                ],
-                limit: 5,
-                subQuery: false
+                attributes: {
+                    include: [
+                        [db.sequelize.literal('(SELECT MAX("createdAt") FROM "Bids" WHERE "Bids"."productId" = "Product"."id")'), 'latestBidTime']
+                    ]
+                },
+                order: [[db.sequelize.literal('"latestBidTime"'), 'DESC']],
+                limit: 5
             });
             res.json(products);
         } catch (error) {
