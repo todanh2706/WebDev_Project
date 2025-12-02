@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { FaEye, FaEyeSlash, FaGavel, FaUser, FaPhone, FaEnvelope } from "react-icons/fa";
 import Button from "../components/Button";
+import Alert from "../components/Alert";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -136,9 +137,7 @@ export default function Register() {
                             </div>
 
                             {(error || localError) && (
-                                <div className="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger" role="alert">
-                                    {localError || error}
-                                </div>
+                                <Alert type="error" message={localError || error} />
                             )}
 
                             <Button

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { FaEye, FaEyeSlash, FaGavel } from "react-icons/fa";
 import Button from "../components/Button";
+import Alert from "../components/Alert";
 
 export default function LogIn() {
     const [email, setEmail] = useState('');
@@ -78,9 +79,7 @@ export default function LogIn() {
                             </div>
 
                             {error && (
-                                <div className="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger" role="alert">
-                                    {error}
-                                </div>
+                                <Alert type="error" message={error} />
                             )}
 
                             <div className="d-flex justify-content-between align-items-center mb-3">

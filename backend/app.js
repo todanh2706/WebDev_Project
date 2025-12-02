@@ -11,11 +11,15 @@ app.use(cors({
     credentials: true
 }));
 
+import db from "./src/models/index.js";
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 route(app);
 
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+db.sequelize.sync().then(() => {
+    app.listen(port, () => {
+        console.log(`Server is listening on port ${port}`);
+    });
 });

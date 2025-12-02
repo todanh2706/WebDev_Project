@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { AuthContext } from "./authContext";
+import { useNavigate } from "react-router-dom";
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
-    const [isLoading, setIsLoading] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         try {
-            const storedToken = localStorage.getItem("token");
+            const storedToken = localStorage.getItem("accessToken");
             const storedUser = localStorage.getItem("user");
 
             if (storedToken && storedUser) {
@@ -18,7 +20,7 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (err) {
             console.error("Failed to load auth state from localStorage", err);
-            localStorage.removeItem("token");
+            localStorage.removeItem("accessToken");
             localStorage.removeITem("user");
         }
     }, []);
@@ -37,12 +39,14 @@ export const AuthProvider = ({ children }) => {
 
             if (!res.ok) throw new Error(data.message || "Failed to login!");
 
-            const { user, token } = data;
+            const { user, accessToken, refreshToken } = data;
             setUser(user);
-            setToken(token);
+            setToken(accessToken);
 
             localStorage.setItem("user", JSON.stringify(user));
-            localStorage.setItem("token", token);
+            localStorage.setItem("accessToken", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            navigate('/home');
         } catch (err) {
             setError(err.message);
         } finally {
@@ -73,8 +77,46 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const refreshAccessToken = async () => {
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (!refreshToken) {
+            logout();
+            return false;
+        }
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/refresh`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.message || "Failed to refresh token!");
+
+            const { accessToken } = data;
+            setToken(accessToken);
+            localStorage.setItem("accessToken", accessToken);
+            return true;
+        } catch (err) {
+            console.error("Token refresh failed:", err);
+            logout();
+            return false;
+        }
+    };
+
+    const logout = () => {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        navigate('/login');
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, error, login, register }}>
+        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout }}>
             {children}
         </AuthContext.Provider>
     )
