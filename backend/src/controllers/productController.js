@@ -1,8 +1,11 @@
 import db from '../models/index.js';
 import seedProducts from '../database/seeders/productSeeder.js';
-const { Product, Bid, User } = db;
+import { seedCategories } from '../database/seeders/categorySeeder.js';
+const Product = db.Product;
+const Bid = db.Bid;
+const User = db.User;
 
-const ProductController = {
+export default {
     getLatestBidded: async (req, res) => {
         try {
             const products = await Product.findAll({
@@ -59,15 +62,14 @@ const ProductController = {
         }
     },
 
-    seedProducts: async (req, res) => {
+    seed: async (req, res) => {
         try {
+            await seedCategories();
             await seedProducts();
-            res.json({ message: 'Database seeded successfully!' });
+            res.json({ message: "Database seeded successfully" });
         } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Error seeding database' });
+            console.error("Error seeding database:", error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
     }
 };
-
-export default ProductController;
