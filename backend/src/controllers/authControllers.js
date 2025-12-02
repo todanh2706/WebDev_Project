@@ -33,6 +33,8 @@ export default {
                 email,
                 password,
                 phone,
+                role: 0, // Default to casual user
+                status: 'active' // Default to active
             });
             return res.status(201).send({ message: 'Account created successfully' });
         } catch (e) {
@@ -67,6 +69,12 @@ export default {
                 process.env.JWT_SECRET || 'refresh_secret',
                 { expiresIn: '7d' }
             );
+
+            // Update last_login_at
+            const now = new Date();
+            const gmt7Time = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+            user.last_login_at = gmt7Time;
+            await user.save();
 
             return res.json({
                 message: 'Login successful.',

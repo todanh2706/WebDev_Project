@@ -50,9 +50,24 @@ export default (sequelize, DataTypes) => {
       unique: true,
     },
     password: DataTypes.STRING,
-    status: DataTypes.STRING,
-    last_login_at: DataTypes.DATE,
-    last_ip_address: DataTypes.STRING
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'active',
+      validate: {
+        isIn: [['active', 'unactive']]
+      }
+    },
+    role: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      validate: {
+        isIn: [[0, 1]]
+      }
+    },
+    last_login_at: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
   }, {
     sequelize,
     modelName: 'User',
