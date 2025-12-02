@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container, NavDropdown, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -12,109 +12,44 @@ const TopNavBar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showMegaMenu, setShowMegaMenu] = useState(false);
-    const [activeCategory, setActiveCategory] = useState('electronics');
+    const [activeCategory, setActiveCategory] = useState(null);
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setCategories(data);
+                    if (data.length > 0) {
+                        setActiveCategory(data[0].id);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    const getCategoryIcon = (name) => {
+        switch (name) {
+            case 'Electronics': return <FaMobileAlt />;
+            case 'Laptops & PC': return <FaLaptop />;
+            case 'Cameras & Photo': return <FaCamera />;
+            case 'Home & Garden': return <FaHome />;
+            case 'Fashion': return <FaTshirt />;
+            case 'Gaming': return <FaGamepad />;
+            default: return <FaChevronRight />;
+        }
+    };
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
-
-    const categories = [
-        {
-            id: 'electronics',
-            name: 'Electronics',
-            icon: <FaMobileAlt />,
-            subcategories: [
-                {
-                    title: 'Phones & Tablets',
-                    items: ['iPhone', 'Samsung Galaxy', 'iPad', 'Android Tablets', 'Accessories']
-                },
-                {
-                    title: 'Computers',
-                    items: ['Laptops', 'Desktops', 'Monitors', 'PC Components', 'Networking']
-                },
-                {
-                    title: 'Audio',
-                    items: ['Headphones', 'Speakers', 'Home Theater', 'Microphones']
-                }
-            ]
-        },
-        {
-            id: 'computers',
-            name: 'Laptops & PC',
-            icon: <FaLaptop />,
-            subcategories: [
-                {
-                    title: 'Laptops',
-                    items: ['Gaming Laptops', 'Ultrabooks', 'MacBook', 'Chromebooks']
-                },
-                {
-                    title: 'Components',
-                    items: ['Graphics Cards', 'Processors', 'Motherboards', 'Storage']
-                }
-            ]
-        },
-        {
-            id: 'cameras',
-            name: 'Cameras & Photo',
-            icon: <FaCamera />,
-            subcategories: [
-                {
-                    title: 'Cameras',
-                    items: ['DSLR', 'Mirrorless', 'Point & Shoot', 'Instant Cameras']
-                },
-                {
-                    title: 'Lenses',
-                    items: ['Zoom Lenses', 'Prime Lenses', 'Wide Angle', 'Macro']
-                }
-            ]
-        },
-        {
-            id: 'home',
-            name: 'Home & Garden',
-            icon: <FaHome />,
-            subcategories: [
-                {
-                    title: 'Furniture',
-                    items: ['Living Room', 'Bedroom', 'Office', 'Outdoor']
-                },
-                {
-                    title: 'Decor',
-                    items: ['Lighting', 'Rugs', 'Wall Art', 'Mirrors']
-                }
-            ]
-        },
-        {
-            id: 'fashion',
-            name: 'Fashion',
-            icon: <FaTshirt />,
-            subcategories: [
-                {
-                    title: 'Men',
-                    items: ['Clothing', 'Shoes', 'Accessories', 'Watches']
-                },
-                {
-                    title: 'Women',
-                    items: ['Clothing', 'Shoes', 'Jewelry', 'Handbags']
-                }
-            ]
-        },
-        {
-            id: 'gaming',
-            name: 'Gaming',
-            icon: <FaGamepad />,
-            subcategories: [
-                {
-                    title: 'Consoles',
-                    items: ['PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'Retro']
-                },
-                {
-                    title: 'Video Games',
-                    items: ['Action', 'RPG', 'Sports', 'Strategy']
-                }
-            ]
-        }
-    ];
 
     return (
         <Navbar expand="lg" className="navbar-auction fixed-top" variant="dark">
@@ -158,7 +93,7 @@ const TopNavBar = () => {
                                                     onMouseEnter={() => setActiveCategory(category.id)}
                                                 >
                                                     <div className="d-flex align-items-center gap-2">
-                                                        {category.icon}
+                                                        {getCategoryIcon(category.name)}
                                                         <span>{category.name}</span>
                                                     </div>
                                                     {activeCategory === category.id && <FaChevronRight size={12} />}
@@ -169,13 +104,11 @@ const TopNavBar = () => {
                                             <Row>
                                                 {categories.find(c => c.id === activeCategory)?.subcategories.map((sub, idx) => (
                                                     <Col md={6} key={idx} className="mb-4 subcategory-group">
-                                                        <h6>{sub.title}</h6>
-                                                        {sub.items.map((item, itemIdx) => (
-                                                            <Link key={itemIdx} to={`/category/${item.toLowerCase().replace(/\s+/g, '-')}`} className="subcategory-link">
-                                                                {item}
-                                                                {['iPhone 17', 'PlayStation 5'].includes(item) && <span className="hot-badge">HOT</span>}
-                                                            </Link>
-                                                        ))}
+                                                        <h6>{sub.name}</h6>
+                                                        {/* Placeholder for sub-items as they are not in the current data model */}
+                                                        <Link to={`/category/${sub.name.toLowerCase().replace(/\s+/g, '-')}`} className="subcategory-link">
+                                                            View All {sub.name}
+                                                        </Link>
                                                     </Col>
                                                 ))}
                                             </Row>

@@ -102,7 +102,7 @@ export default function LogIn() {
                             </Button>
 
                             <div className="text-center mt-4 text-white-50">
-                                Don't have an account? <a href="\register" className="text-auction-primary text-decoration-none fw-bold">Sign up</a>
+                                Don't have an account? <a href="\register" className="text-auction-primary text-decoration-none fw-bold">Register</a>
                             </div>
                         </form>
                     </div>

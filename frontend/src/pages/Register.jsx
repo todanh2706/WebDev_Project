@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash, FaGavel, FaUser, FaPhone, FaEnvelope } from "react-i
 import Button from "../components/Button";
 import Alert from "../components/Alert";
 import { useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -13,6 +14,7 @@ export default function Register() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [localError, setLocalError] = useState('');
+    const [captchaToken, setCaptchaToken] = useState(null);
 
     const { register, isLoading, error } = useAuth();
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ export default function Register() {
         }
 
         try {
-            await register(name, email, phone, password);
+            await register(name, email, phone, password, captchaToken);
             navigate('/login');
         } catch (err) {
             // Error is handled by context
@@ -140,11 +142,20 @@ export default function Register() {
                                 <Alert type="error" message={localError || error} />
                             )}
 
+                            <div className="d-flex justify-content-center my-3">
+                                <ReCAPTCHA
+                                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY || "YOUR_RECAPTCHA_SITE_KEY"}
+                                    onChange={(token) => setCaptchaToken(token)}
+                                    theme="dark"
+                                />
+                            </div>
+
                             <Button
                                 type="submit"
                                 className="py-3 fs-5 rounded-3 mt-2"
                                 isLoading={isLoading}
                                 loadingText="Creating Account..."
+                                disabled={!captchaToken}
                             >
                                 Register
                             </Button>

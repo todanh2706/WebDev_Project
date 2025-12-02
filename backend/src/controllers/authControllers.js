@@ -6,8 +6,22 @@ const { User } = model;
 
 export default {
     async register(req, res) {
-        const { email, password, name, phone } = req.body;
+        const { email, password, name, phone, captchaToken } = req.body;
+
+        // Verify reCAPTCHA
+        if (!captchaToken) {
+            return res.status(400).send({ message: 'reCAPTCHA verification failed. Please try again.' });
+        }
+
         try {
+            const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY || 'YOUR_RECAPTCHA_SECRET_KEY'}&response=${captchaToken}`;
+            const response = await fetch(verificationUrl, { method: 'POST' });
+            const data = await response.json();
+
+            if (!data.success) {
+                return res.status(400).send({ message: 'reCAPTCHA verification failed. Please try again.' });
+            }
+
             const user = await User.findOne({ where: { [Op.or]: [{ phone }, { email }] } });
             if (user) {
                 return res.status(422)
