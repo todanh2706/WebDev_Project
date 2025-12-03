@@ -1,20 +1,30 @@
 import db from '../models/index.js';
 import seedProducts from '../database/seeders/productSeeder.js';
 import { seedCategories } from '../database/seeders/categorySeeder.js';
-const Product = db.Product;
+
+const Products = db.Products;
 const Bid = db.Bid;
-const User = db.User;
+const ProductsImage = db.ProductsImage;
 
 export default {
     getLatestBidded: async (req, res) => {
         try {
-            const products = await Product.findAll({
+            const products = await Products.findAll({
                 attributes: {
                     include: [
-                        [db.sequelize.literal('(SELECT MAX("createdAt") FROM "Bids" WHERE "Bids"."productId" = "Product"."id")'), 'latestBidTime']
+                        [db.sequelize.literal('(SELECT MAX("bid_time") FROM "Bids" WHERE "Bids"."product_id" = "Products"."id")'), 'latest_bid_time']
                     ]
                 },
-                order: [[db.sequelize.literal('"latestBidTime"'), 'DESC']],
+                include: [
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url'],
+                        where: { is_thumbnail: true },
+                        required: false
+                    }
+                ],
+                order: [[db.sequelize.literal('"latest_bid_time"'), 'DESC']],
                 limit: 5
             });
             res.json(products);
@@ -26,19 +36,28 @@ export default {
 
     getMostBidded: async (req, res) => {
         try {
-            const products = await Product.findAll({
+            const products = await Products.findAll({
                 attributes: {
                     include: [
-                        [db.sequelize.fn('COUNT', db.sequelize.col('bids.id')), 'bidCount']
+                        [db.sequelize.fn('COUNT', db.sequelize.col('bids.bid_id')), 'bid_count']
                     ]
                 },
-                include: [{
-                    model: Bid,
-                    as: 'bids',
-                    attributes: []
-                }],
-                group: ['Product.id'],
-                order: [[db.sequelize.col('bidCount'), 'DESC']],
+                include: [
+                    {
+                        model: Bid,
+                        as: 'bids',
+                        attributes: []
+                    },
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url'],
+                        where: { is_thumbnail: true },
+                        required: false
+                    }
+                ],
+                group: ['Products.id', 'images.id'],
+                order: [[db.sequelize.col('bid_count'), 'DESC']],
                 limit: 5,
                 subQuery: false
             });
@@ -51,8 +70,17 @@ export default {
 
     getHighestPrice: async (req, res) => {
         try {
-            const products = await Product.findAll({
-                order: [['currentPrice', 'DESC']],
+            const products = await Products.findAll({
+                include: [
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url'],
+                        where: { is_thumbnail: true },
+                        required: false
+                    }
+                ],
+                order: [['current_price', 'DESC']],
                 limit: 5
             });
             res.json(products);

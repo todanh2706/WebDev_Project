@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 const PROTECTED_ATTRIBUTES = ['password'];
 
 export default (sequelize, DataTypes) => {
-  class User extends Model {
+  class Users extends Model {
     async validPassword(password) {
       return await bcrypt.compare(password, this.password);
     }
@@ -23,11 +23,54 @@ export default (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Users.hasMany(models.Products, {
+        foreignKey: 'seller_id',
+        as: 'products'
+      });
+      Users.hasMany(models.Products, {
+        foreignKey: 'current_winner_id',
+        as: 'current_wins'
+      });
+      Users.hasMany(models.Bid, {
+        foreignKey: 'bidder_id',
+        as: 'bids'
+      });
+      Users.hasMany(models.Watchlist, {
+        foreignKey: 'user_id',
+        as: 'watchlist'
+      });
+      Users.hasMany(models.BannedBidders, {
+        foreignKey: 'user_id',
+        as: 'banned_bidders'
+      });
+      Users.hasMany(models.Feedbacks, {
+        foreignKey: 'reviewer_id',
+        as: 'reviews'
+      });
+      Users.hasMany(models.Feedbacks, {
+        foreignKey: 'target_user_id',
+        as: 'target_user_reviews'
+      });
+      Users.hasMany(models.Orders, {
+        foreignKey: 'winner_id',
+        as: 'won_orders'
+      });
+      Users.hasMany(models.Orders, {
+        foreignKey: 'seller_id',
+        as: 'sold_orders'
+      });
+      Users.hasMany(models.ProductQuestions, {
+        foreignKey: 'user_id',
+        as: 'questions'
+      });
     }
   };
-  User.init({
-    name: DataTypes.STRING,
+  Users.init({
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: {
@@ -45,10 +88,6 @@ export default (sequelize, DataTypes) => {
         },
       },
     },
-    phone: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
     password: DataTypes.STRING,
     status: {
       type: DataTypes.STRING,
@@ -57,20 +96,31 @@ export default (sequelize, DataTypes) => {
         isIn: [['active', 'unactive']]
       }
     },
+    name: DataTypes.STRING,
+    address: DataTypes.STRING,
+    phone: {
+      type: DataTypes.STRING,
+      unique: true,
+    },
     role: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
       validate: {
-        isIn: [[0, 1]]
+        isIn: [[0, 1, 2]] // 0: bidder, 1: seller, 2: admin
       }
     },
-    last_login_at: {
+    is_verified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    otp_code: DataTypes.STRING,
+    opt_expiry: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
     },
   }, {
     sequelize,
-    modelName: 'User',
+    modelName: 'Users',
     hooks: {
       beforeCreate: async (user) => {
         if (user.password) {
@@ -86,5 +136,5 @@ export default (sequelize, DataTypes) => {
       }
     }
   });
-  return User;
+  return Users;
 };

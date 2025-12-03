@@ -2,11 +2,11 @@ import { Op } from 'sequelize';
 import model from '../models/index.js';
 import jwt from 'jsonwebtoken';
 
-const { User } = model;
+const { Users } = model;
 
 export default {
     async register(req, res) {
-        const { email, password, name, phone, captchaToken } = req.body;
+        const { email, password, name, phone, address, captchaToken } = req.body;
 
         // Verify reCAPTCHA
         if (!captchaToken) {
@@ -22,17 +22,18 @@ export default {
                 return res.status(400).send({ message: 'reCAPTCHA verification failed. Please try again.' });
             }
 
-            const user = await User.findOne({ where: { [Op.or]: [{ phone }, { email }] } });
+            const user = await Users.findOne({ where: { [Op.or]: [{ phone }, { email }] } });
             if (user) {
                 return res.status(422)
                     .send({ message: 'User with that email or phone already exists' });
             }
 
-            await User.create({
+            await Users.create({
                 name,
                 email,
                 password,
                 phone,
+                address,
                 role: 0, // Default to casual user
                 status: 'active' // Default to active
             });
@@ -46,7 +47,7 @@ export default {
     async logIn(req, res) {
         const { email, password } = req.body;
         try {
-            const user = await User.findOne({ where: { email } });
+            const user = await Users.findOne({ where: { email } });
             if (!user) {
                 return res.status(404).send({ message: 'Invalid username or password!' });
             }

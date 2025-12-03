@@ -15,9 +15,11 @@ export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const [localError, setLocalError] = useState('');
     const [captchaToken, setCaptchaToken] = useState(null);
+    const [address, setAddress] = useState('');
 
     const { register, isLoading, error } = useAuth();
     const navigate = useNavigate();
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,7 +31,7 @@ export default function Register() {
         }
 
         try {
-            await register(name, email, phone, password, captchaToken);
+            await register(name, email, phone, address, password, captchaToken);
             navigate('/login');
         } catch (err) {
             // Error is handled by context
@@ -103,6 +105,19 @@ export default function Register() {
                                     required
                                 />
                                 <label htmlFor="floatingPhone" className="text-auction-primary">Phone Number</label>
+                            </div>
+
+                            <div className="form-floating">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="floatingAddress"
+                                    placeholder="227 Nguyen Van Cu, Cho Quan ward, District 5, Ho Chi Minh City"
+                                    value={address}
+                                    onChange={e => setAddress(e.target.value)}
+                                    required
+                                />
+                                <label htmlFor="floatingAddress" className="text-auction-primary">Address</label>
                             </div>
 
                             <div className="form-floating position-relative">

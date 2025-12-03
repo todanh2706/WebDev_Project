@@ -1,7 +1,6 @@
 import db from '../../models/index.js';
 
-const Category = db.Category;
-const Subcategory = db.Subcategory;
+const Categories = db.Categories;
 
 const categoriesData = [
     {
@@ -51,7 +50,7 @@ const categoriesData = [
 
 export const seedCategories = async () => {
     try {
-        const count = await Category.count();
+        const count = await Categories.count();
         if (count > 0) {
             console.log('Categories already seeded.');
             return;
@@ -60,12 +59,12 @@ export const seedCategories = async () => {
         console.log('Seeding categories...');
 
         for (const catData of categoriesData) {
-            const category = await Category.create({ name: catData.name });
+            const category = await Categories.create({ name: catData.name });
 
             for (const subName of catData.subcategories) {
-                await Subcategory.create({
+                await Categories.create({
                     name: subName,
-                    categoryId: category.id
+                    parent_id: category.id
                 });
             }
         }

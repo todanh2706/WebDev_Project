@@ -1,14 +1,14 @@
 import db from '../models/index.js';
 
-const Category = db.Category;
-const Subcategory = db.Subcategory;
+const Categories = db.Categories;
 
 export default {
     getAll: async (req, res) => {
         try {
-            const categories = await Category.findAll({
+            const categories = await Categories.findAll({
+                where: { parent_id: null },
                 include: [{
-                    model: Subcategory,
+                    model: Categories,
                     as: 'subcategories',
                     attributes: ['id', 'name']
                 }],

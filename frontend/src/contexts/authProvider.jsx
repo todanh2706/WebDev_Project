@@ -54,13 +54,13 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const register = async (name, email, phone, password, captchaToken) => {
+    const register = async (name, email, phone, address, password, captchaToken) => {
         setIsLoading(true);
         try {
             const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, phone, password, captchaToken }),
+                body: JSON.stringify({ name, email, phone, address, password, captchaToken }),
             });
 
             const data = await res.json();

@@ -4,7 +4,8 @@ import Button from './Button';
 import { FaGavel, FaClock } from 'react-icons/fa';
 
 const ProductCard = ({ product }) => {
-    const { name, currentPrice, imageUrl, endTime, bidCount } = product;
+    const { name, current_price, images, end_date, bid_count } = product;
+    const imageUrl = images && images.length > 0 ? images[0].image_url : 'https://placehold.co/600x400?text=No+Image';
 
     const formatTimeLeft = (endTime) => {
         const total = Date.parse(endTime) - Date.parse(new Date());
@@ -24,7 +25,7 @@ const ProductCard = ({ product }) => {
                 <div className="position-absolute top-0 end-0 p-3">
                     <span className="badge bg-black bg-opacity-75 backdrop-blur border border-secondary border-opacity-25 py-2 px-3 rounded-md">
                         <FaClock className="me-2 text-auction-primary" />
-                        {formatTimeLeft(endTime)}
+                        {formatTimeLeft(end_date)}
                     </span>
                 </div>
                 {/* Gradient Overlay */}
@@ -45,13 +46,13 @@ const ProductCard = ({ product }) => {
                         <div>
                             <small className="text-white-50 d-block mb-1 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Current Bid</small>
                             <span className="h3 text-auction-primary mb-0 fw-bold">
-                                ${parseFloat(currentPrice).toLocaleString()}
+                                ${parseFloat(current_price).toLocaleString()}
                             </span>
                         </div>
-                        {bidCount !== undefined && (
+                        {bid_count !== undefined && (
                             <div className="text-end">
                                 <small className="text-white-50 d-block mb-1 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '1px' }}>Bids</small>
-                                <span className="fw-bold fs-5">{bidCount}</span>
+                                <span className="fw-bold fs-5">{bid_count}</span>
                             </div>
                         )}
                     </div>
