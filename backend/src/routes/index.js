@@ -13,7 +13,6 @@ export default (app) => {
     app.get('/api/products/latest-bidded', ProductController.getLatestBidded);
     app.get('/api/products/most-bidded', ProductController.getMostBidded);
     app.get('/api/products/highest-price', ProductController.getHighestPrice);
-    app.post('/api/seed', ProductController.seed);
 
     // Category Routes
     app.get('/api/categories', CategoryController.getAll); // Added new route for categories

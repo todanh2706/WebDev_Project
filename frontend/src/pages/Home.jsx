@@ -82,7 +82,7 @@ export default function Home() {
                                 </Link>
                             </div>
 
-                            {/* Temporary Seed Button */}
+                            {/* Temporary Seed Button
                             <div className="mt-5">
                                 <button onClick={async () => {
                                     try {
@@ -94,7 +94,7 @@ export default function Home() {
                                 }} className="btn btn-sm btn-outline-secondary opacity-50">
                                     Seed Database (Dev Only)
                                 </button>
-                            </div>
+                            </div> */}
                         </Col>
                     </Row>
                 </Container>

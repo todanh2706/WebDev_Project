@@ -48,7 +48,7 @@ const categoriesData = [
     }
 ];
 
-export const seedCategories = async () => {
+export const up = async (queryInterface, Sequelize) => {
     try {
         const count = await Categories.count();
         if (count > 0) {
@@ -73,4 +73,8 @@ export const seedCategories = async () => {
     } catch (error) {
         console.error('Error seeding categories:', error);
     }
+};
+
+export const down = async (queryInterface, Sequelize) => {
+    await queryInterface.bulkDelete('Categories', null, {});
 };

@@ -1,6 +1,4 @@
 import db from '../models/index.js';
-import seedProducts from '../database/seeders/productSeeder.js';
-import { seedCategories } from '../database/seeders/categorySeeder.js';
 
 const Products = db.Products;
 const Bid = db.Bid;
@@ -90,14 +88,4 @@ export default {
         }
     },
 
-    seed: async (req, res) => {
-        try {
-            await seedCategories();
-            await seedProducts();
-            res.json({ message: "Database seeded successfully" });
-        } catch (error) {
-            console.error("Error seeding database:", error);
-            res.status(500).json({ error: "Internal Server Error" });
-        }
-    }
 };
