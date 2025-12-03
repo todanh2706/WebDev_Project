@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../contexts/ToastContext";
 import { FaEye, FaEyeSlash, FaGavel } from "react-icons/fa";
 import Button from "../components/Button";
-import Alert from "../components/Alert";
+
 
 export default function LogIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading, error } = useAuth();
+    const { showToast } = useToast();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await login(email, password);
+        try {
+            await login(email, password);
+            showToast("Login successful!", "success");
+        } catch (err) {
+            showToast(err.message || "Login failed", "error");
+        }
     }
 
     return (
@@ -78,9 +85,7 @@ export default function LogIn() {
                                 </div>
                             </div>
 
-                            {error && (
-                                <Alert type="error" message={error} />
-                            )}
+                            {/* Error handled by Toast */}
 
                             <div className="d-flex justify-content-between align-items-center mb-3">
                                 <div className="form-check">

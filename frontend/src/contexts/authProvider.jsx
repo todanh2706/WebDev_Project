@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }) => {
             navigate('/home');
         } catch (err) {
             setError(err.message);
+            throw err;
         } finally {
             setIsLoading(false);
         }
@@ -115,8 +116,32 @@ export const AuthProvider = ({ children }) => {
         navigate('/login');
     };
 
+    const verifyOTP = async (email, otp) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/verify-otp`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, otp }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Verification failed");
+            }
+
+            return data;
+        } catch (err) {
+            setError(err.message);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout }}>
+        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout, verifyOTP }}>
             {children}
         </AuthContext.Provider>
     )

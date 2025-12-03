@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../contexts/ToastContext";
 import { FaEye, FaEyeSlash, FaGavel, FaUser, FaPhone, FaEnvelope } from "react-icons/fa";
 import Button from "../components/Button";
-import Alert from "../components/Alert";
+
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 
@@ -21,20 +22,25 @@ export default function Register() {
     const navigate = useNavigate();
 
 
+    const { showToast } = useToast();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLocalError('');
 
         if (password !== confirmPassword) {
             setLocalError("Passwords do not match!");
+            showToast("Passwords do not match!", "error");
             return;
         }
 
         try {
             await register(name, email, phone, address, password, captchaToken);
-            navigate('/login');
+            showToast("Registration successful! Please verify your email.", "success");
+            navigate('/verify-otp', { state: { email } });
         } catch (err) {
-            // Error is handled by context
+            // Error is handled by context but we also show toast
+            showToast(err.message || "Registration failed", "error");
         }
     }
 
@@ -153,9 +159,7 @@ export default function Register() {
                                 <label htmlFor="floatingConfirmPassword" className="text-auction-primary">Confirm Password</label>
                             </div>
 
-                            {(error || localError) && (
-                                <Alert type="error" message={localError || error} />
-                            )}
+                            {/* Error handled by Toast */}
 
                             <div className="d-flex justify-content-center my-3">
                                 <ReCAPTCHA
