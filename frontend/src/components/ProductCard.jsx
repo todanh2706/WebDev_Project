@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import Button from './Button';
-import { FaGavel, FaClock } from 'react-icons/fa';
+import { FaEye, FaClock } from 'react-icons/fa';
 
 const ProductCard = ({ product }) => {
     const { name, current_price, images, end_date, bid_count } = product;
@@ -57,9 +58,11 @@ const ProductCard = ({ product }) => {
                         )}
                     </div>
 
-                    <Button className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm">
-                        <FaGavel /> Place Bid
-                    </Button>
+                    <Link to={`/product/${product.id}`} className="text-decoration-none">
+                        <Button className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm">
+                            <FaEye /> More Details
+                        </Button>
+                    </Link>
                 </div>
             </Card.Body>
         </Card>

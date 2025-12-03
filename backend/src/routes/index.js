@@ -14,6 +14,7 @@ export default (app) => {
     app.get('/api/products/most-bidded', ProductController.getMostBidded);
     app.get('/api/products/highest-price', ProductController.getHighestPrice);
     app.get('/api/products/category/:id', ProductController.getByCategory);
+    app.get('/api/products/:id', ProductController.getById);
     // Category Routes
     app.get('/api/categories', CategoryController.getAll); // Added new route for categories
     app.get('/api/categories/:id', CategoryController.getById);

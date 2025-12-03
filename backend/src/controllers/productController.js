@@ -122,4 +122,49 @@ export default {
         }
     },
 
+    getById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const product = await Products.findByPk(id, {
+                attributes: {
+                    include: [
+                        [db.sequelize.fn('COUNT', db.sequelize.col('bids.bid_id')), 'bid_count']
+                    ]
+                },
+                include: [
+                    {
+                        model: Bid,
+                        as: 'bids',
+                        attributes: []
+                    },
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url', 'is_thumbnail']
+                    },
+                    {
+                        model: db.Users,
+                        as: 'seller',
+                        attributes: ['id', 'name', 'email']
+                    },
+                    {
+                        model: db.Categories,
+                        as: 'category',
+                        attributes: ['id', 'name']
+                    }
+                ],
+                group: ['Products.id', 'images.id', 'seller.id', 'category.id']
+            });
+
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            res.json(product);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching product details' });
+        }
+    },
+
 };

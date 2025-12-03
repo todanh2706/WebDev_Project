@@ -5,6 +5,7 @@ import LogIn from './pages/LogIn';
 import Register from './pages/Register';
 import OTPVerification from './pages/OTPVerification';
 import CategoryProducts from './pages/CategoryProducts';
+import ProductDetail from './pages/ProductDetail';
 import { ToastProvider } from './contexts/ToastContext';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import TopNavBar from './components/TopNavBar';
@@ -24,6 +25,7 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<OTPVerification />} />
         <Route path="/category/:id" element={<CategoryProducts />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
       </Routes>
     </>
   )
