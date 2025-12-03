@@ -114,7 +114,7 @@ export default (sequelize, DataTypes) => {
       defaultValue: false,
     },
     otp_code: DataTypes.STRING,
-    opt_expiry: {
+    otp_expiry: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },

@@ -2,6 +2,8 @@ import { Op } from 'sequelize';
 import model from '../models/index.js';
 import jwt from 'jsonwebtoken';
 
+import { sendOTP } from '../services/emailService.js';
+
 const { Users } = model;
 
 export default {
@@ -28,6 +30,9 @@ export default {
                     .send({ message: 'User with that email or phone already exists' });
             }
 
+            const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
             await Users.create({
                 name,
                 email,
@@ -35,12 +40,46 @@ export default {
                 phone,
                 address,
                 role: 0, // Default to casual user
-                status: 'active' // Default to active
+                status: 'active',
+                otp_code: otp,
+                otp_expiry: otpExpiry,
+                is_verified: false
             });
-            return res.status(201).send({ message: 'Account created successfully' });
+
+            await sendOTP(email, otp);
+
+            return res.status(201).send({ message: 'Account created. Please check your email for OTP.' });
         } catch (e) {
             console.log(e);
             return res.status(500).send({ message: 'Could not perform operation at this time, kindly try again later.' });
+        }
+    },
+
+    async verifyOTP(req, res) {
+        const { email, otp } = req.body;
+        try {
+            const user = await Users.findOne({ where: { email } });
+            if (!user) {
+                return res.status(404).send({ message: 'User not found.' });
+            }
+
+            if (user.otp_code !== otp) {
+                return res.status(400).send({ message: 'Invalid OTP.' });
+            }
+
+            if (new Date() > user.otp_expiry) {
+                return res.status(400).send({ message: 'OTP has expired.' });
+            }
+
+            user.is_verified = true;
+            user.otp_code = null;
+            user.otp_expiry = null;
+            await user.save();
+
+            return res.status(200).send({ message: 'Account verified successfully.' });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).send({ message: 'Error verifying OTP.' });
         }
     },
 
