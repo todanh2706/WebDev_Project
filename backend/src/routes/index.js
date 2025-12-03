@@ -13,9 +13,10 @@ export default (app) => {
     app.get('/api/products/latest-bidded', ProductController.getLatestBidded);
     app.get('/api/products/most-bidded', ProductController.getMostBidded);
     app.get('/api/products/highest-price', ProductController.getHighestPrice);
-
+    app.get('/api/products/category/:id', ProductController.getByCategory);
     // Category Routes
     app.get('/api/categories', CategoryController.getAll); // Added new route for categories
+    app.get('/api/categories/:id', CategoryController.getById);
 
     app.get('/', (req, res) => {
         res.send('Backend is running!');

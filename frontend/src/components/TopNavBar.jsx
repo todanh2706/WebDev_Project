@@ -106,7 +106,7 @@ const TopNavBar = () => {
                                                     <Col md={6} key={idx} className="mb-4 subcategory-group">
                                                         <h6>{sub.name}</h6>
                                                         {/* Placeholder for sub-items as they are not in the current data model */}
-                                                        <Link to={`/category/${sub.name.toLowerCase().replace(/\s+/g, '-')}`} className="subcategory-link">
+                                                        <Link to={`/category/${sub.id}`} className="subcategory-link">
                                                             View All {sub.name}
                                                         </Link>
                                                     </Col>

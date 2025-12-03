@@ -19,5 +19,19 @@ export default {
             console.error("Error fetching categories:", error);
             res.status(500).json({ error: "Internal Server Error" });
         }
+    },
+
+    getById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const category = await Categories.findByPk(id);
+            if (!category) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+            res.json(category);
+        } catch (error) {
+            console.error("Error fetching category:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
 };
