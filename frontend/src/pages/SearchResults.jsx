@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Form } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
 import { useToast } from '../contexts/ToastContext';
 
@@ -13,6 +13,7 @@ const SearchResults = () => {
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [sortBy, setSortBy] = useState('default');
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -21,7 +22,7 @@ const SearchResults = () => {
 
             setLoading(true);
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/search?q=${encodeURIComponent(query)}&page=${currentPage}&limit=12`);
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/search?q=${encodeURIComponent(query)}&page=${currentPage}&limit=12&sort=${sortBy}`);
                 if (!response.ok) throw new Error('Failed to fetch search results');
                 const data = await response.json();
 
@@ -41,11 +42,12 @@ const SearchResults = () => {
         };
 
         fetchSearchResults();
-    }, [query, currentPage, showToast]);
+    }, [query, currentPage, sortBy, showToast]);
 
     // Reset page when query changes
     useEffect(() => {
         setCurrentPage(1);
+        setSortBy('default');
     }, [query]);
 
     const handlePageChange = (page) => {
@@ -56,14 +58,30 @@ const SearchResults = () => {
     return (
         <div className="min-vh-100 auction-bg-pattern py-5">
             <Container>
-                <div className="glass-panel p-4 mb-5 rounded-4 animate-fade-in mt-5">
-                    <h2 className="text-white fw-bold mb-0">
-                        <span className="text-auction-primary me-2">Search Results for:</span>
-                        "{query}"
-                    </h2>
-                    <p className="text-white-50 mb-0 mt-2">
-                        Found {products.length} items on this page
-                    </p>
+                <div className="glass-panel p-4 mb-5 rounded-4 animate-fade-in mt-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h2 className="text-white fw-bold mb-0">
+                            <span className="text-auction-primary me-2">Search Results for:</span>
+                            "{query}"
+                        </h2>
+                        <p className="text-white-50 mb-0 mt-2">
+                            Found {products.length} items on this page
+                        </p>
+                    </div>
+
+                    <div className="d-flex align-items-center gap-2">
+                        <span className="text-white-50">Sort by:</span>
+                        <Form.Select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="bg-black text-white border-secondary"
+                            style={{ width: 'auto', minWidth: '200px' }}
+                        >
+                            <option value="default">Newest First</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="time_desc">End Date: Furthest First</option>
+                        </Form.Select>
+                    </div>
                 </div>
 
                 {loading ? (

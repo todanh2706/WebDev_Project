@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Form } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
 import { useToast } from '../contexts/ToastContext';
 
@@ -13,14 +13,15 @@ const CategoryProducts = () => {
     const [categoryName, setCategoryName] = useState('Category');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [sortBy, setSortBy] = useState('default');
     const { showToast } = useToast();
 
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                // Fetch products by category with pagination
-                const productsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/category/${id}?page=${currentPage}&limit=4`);
+                // Fetch products by category with pagination and sorting
+                const productsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/category/${id}?page=${currentPage}&limit=12&sort=${sortBy}`);
                 if (!productsResponse.ok) throw new Error('Failed to fetch products');
                 const data = await productsResponse.json();
 
@@ -50,11 +51,12 @@ const CategoryProducts = () => {
         if (id) {
             fetchProducts();
         }
-    }, [id, currentPage, showToast]);
+    }, [id, currentPage, sortBy, showToast]);
 
     // Reset page when category changes
     useEffect(() => {
         setCurrentPage(1);
+        setSortBy('default');
     }, [id]);
 
     const handlePageChange = (page) => {
@@ -65,14 +67,30 @@ const CategoryProducts = () => {
     return (
         <div className="min-vh-100 auction-bg-pattern py-5">
             <Container>
-                <div className="glass-panel p-4 mb-5 rounded-4 animate-fade-in mt-5">
-                    <h2 className="text-white fw-bold mb-0">
-                        <span className="text-auction-primary me-2">Category:</span>
-                        {categoryName}
-                    </h2>
-                    <p className="text-white-50 mb-0 mt-2">
-                        Found {products.length} items on this page
-                    </p>
+                <div className="glass-panel p-4 mb-5 rounded-4 animate-fade-in mt-5 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h2 className="text-white fw-bold mb-0">
+                            <span className="text-auction-primary me-2">Category:</span>
+                            {categoryName}
+                        </h2>
+                        <p className="text-white-50 mb-0 mt-2">
+                            Found {products.length} items on this page
+                        </p>
+                    </div>
+
+                    <div className="d-flex align-items-center gap-2">
+                        <span className="text-white-50">Sort by:</span>
+                        <Form.Select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="bg-black text-white border-secondary"
+                            style={{ width: 'auto', minWidth: '200px' }}
+                        >
+                            <option value="default">Newest First</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="time_desc">End Date: Furthest First</option>
+                        </Form.Select>
+                    </div>
                 </div>
 
                 {loading ? (

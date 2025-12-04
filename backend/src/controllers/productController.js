@@ -92,8 +92,16 @@ export default {
         try {
             const { id } = req.params;
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 4;
+            const limit = parseInt(req.query.limit) || 12;
+            const sort = req.query.sort || 'default';
             const offset = (page - 1) * limit;
+
+            let order = [['createdAt', 'DESC']];
+            if (sort === 'price_asc') {
+                order = [['current_price', 'ASC']];
+            } else if (sort === 'time_desc') {
+                order = [['end_date', 'DESC']];
+            }
 
             const products = await Products.findAll({
                 where: { category_id: id },
@@ -117,7 +125,7 @@ export default {
                     }
                 ],
                 group: ['Products.id', 'images.id'],
-                order: [['createdAt', 'DESC']],
+                order: order,
                 limit: limit,
                 offset: offset,
                 subQuery: false
@@ -187,10 +195,18 @@ export default {
             const { q } = req.query;
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 12;
+            const sort = req.query.sort || 'default';
             const offset = (page - 1) * limit;
 
             if (!q) {
                 return res.status(400).json({ message: 'Search query is required' });
+            }
+
+            let order = [['createdAt', 'DESC']];
+            if (sort === 'price_asc') {
+                order = [['current_price', 'ASC']];
+            } else if (sort === 'time_desc') {
+                order = [['end_date', 'DESC']];
             }
 
             const products = await Products.findAll({
@@ -216,7 +232,7 @@ export default {
                     }
                 ],
                 group: ['Products.id', 'images.id'],
-                order: [['createdAt', 'DESC']],
+                order: order,
                 limit: limit,
                 offset: offset,
                 subQuery: false
