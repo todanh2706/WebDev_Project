@@ -4,11 +4,15 @@ import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import ProductCard from '../components/ProductCard';
 import { useToast } from '../contexts/ToastContext';
 
+import Pagination from '../components/Pagination';
+
 const SearchResults = () => {
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q');
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const { showToast } = useToast();
 
     useEffect(() => {
@@ -17,10 +21,17 @@ const SearchResults = () => {
 
             setLoading(true);
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`);
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/search?q=${encodeURIComponent(query)}&page=${currentPage}&limit=12`);
                 if (!response.ok) throw new Error('Failed to fetch search results');
                 const data = await response.json();
-                setProducts(data);
+
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                    setTotalPages(1);
+                } else {
+                    setProducts(data.products);
+                    setTotalPages(data.totalPages);
+                }
             } catch (error) {
                 console.error('Error searching products:', error);
                 showToast('Failed to load search results', 'error');
@@ -30,7 +41,17 @@ const SearchResults = () => {
         };
 
         fetchSearchResults();
-    }, [query, showToast]);
+    }, [query, currentPage, showToast]);
+
+    // Reset page when query changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [query]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <div className="min-vh-100 auction-bg-pattern py-5">
@@ -41,7 +62,7 @@ const SearchResults = () => {
                         "{query}"
                     </h2>
                     <p className="text-white-50 mb-0 mt-2">
-                        Found {products.length} items
+                        Found {products.length} items on this page
                     </p>
                 </div>
 
@@ -50,13 +71,21 @@ const SearchResults = () => {
                         <Spinner animation="border" variant="warning" />
                     </div>
                 ) : products.length > 0 ? (
-                    <Row xs={1} md={2} lg={3} xl={4} className="g-4">
-                        {products.map(product => (
-                            <Col key={product.id}>
-                                <ProductCard product={product} />
-                            </Col>
-                        ))}
-                    </Row>
+                    <>
+                        <Row xs={1} md={2} lg={3} xl={4} className="g-4">
+                            {products.map(product => (
+                                <Col key={product.id}>
+                                    <ProductCard product={product} />
+                                </Col>
+                            ))}
+                        </Row>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={handlePageChange}
+                        />
+                    </>
                 ) : (
                     <div className="text-center py-5 glass-panel rounded-4">
                         <h3 className="text-white-50">No products found matching "{query}".</h3>

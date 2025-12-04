@@ -91,6 +91,10 @@ export default {
     getByCategory: async (req, res) => {
         try {
             const { id } = req.params;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 4;
+            const offset = (page - 1) * limit;
+
             const products = await Products.findAll({
                 where: { category_id: id },
                 attributes: {
@@ -113,9 +117,20 @@ export default {
                     }
                 ],
                 group: ['Products.id', 'images.id'],
-                order: [['createdAt', 'DESC']]
+                order: [['createdAt', 'DESC']],
+                limit: limit,
+                offset: offset,
+                subQuery: false
             });
-            res.json(products);
+
+            const totalItems = await Products.count({ where: { category_id: id } });
+
+            res.json({
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                products: products
+            });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error fetching products by category' });
@@ -170,6 +185,10 @@ export default {
     search: async (req, res) => {
         try {
             const { q } = req.query;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 12;
+            const offset = (page - 1) * limit;
+
             if (!q) {
                 return res.status(400).json({ message: 'Search query is required' });
             }
@@ -197,9 +216,23 @@ export default {
                     }
                 ],
                 group: ['Products.id', 'images.id'],
-                order: [['createdAt', 'DESC']]
+                order: [['createdAt', 'DESC']],
+                limit: limit,
+                offset: offset,
+                subQuery: false
             });
-            res.json(products);
+
+            const totalItems = await Products.count({
+                where: db.sequelize.literal(`"full_text_search" @@ plainto_tsquery('english', :query)`),
+                replacements: { query: q }
+            });
+
+            res.json({
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                products: products
+            });
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error searching products' });
