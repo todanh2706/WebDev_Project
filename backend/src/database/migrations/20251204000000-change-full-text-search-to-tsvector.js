@@ -7,7 +7,7 @@ module.exports = {
         await queryInterface.sequelize.query(`
       ALTER TABLE "Products"
       ALTER COLUMN "full_text_search" TYPE TSVECTOR
-      USING to_tsvector('english', "full_text_search");
+      USING to_tsvector('english', "full_text_search"::text);
     `);
 
         // 2. Add a GIN index for performance

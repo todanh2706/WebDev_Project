@@ -35,74 +35,84 @@ const OTPVerification = () => {
 
     if (!email) {
         return (
-            <Container className="d-flex align-items-center justify-content-center min-vh-100">
-                <div className="text-center text-white">
-                    <h3>Error</h3>
-                    <p>No email provided for verification.</p>
-                    <Button onClick={() => navigate('/register')}>Go to Register</Button>
+            <div className="container-fluid min-vh-100 auction-bg-pattern d-flex align-items-center justify-content-center">
+                <div className="glass-panel p-5 rounded-4 text-center animate-fade-in">
+                    <h3 className="text-danger mb-3">Access Denied</h3>
+                    <p className="text-white-50 mb-4">No email provided for verification.</p>
+                    <Button onClick={() => navigate('/register')} className="w-100">
+                        Go to Register
+                    </Button>
                 </div>
-            </Container>
+            </div>
         );
     }
 
     return (
-        <div className="min-vh-100 d-flex align-items-center justify-content-center py-5 position-relative overflow-hidden">
-            {/* Background Elements */}
-            <div className="position-absolute top-0 start-0 w-100 h-100 bg-black"></div>
-            <div className="position-absolute top-0 start-0 w-100 h-100 bg-gradient-radial from-auction-primary/20 to-transparent opacity-20"></div>
-
-            <Container className="position-relative z-1">
-                <Row className="justify-content-center">
-                    <Col md={6} lg={5} xl={4}>
-                        <div className="glass-panel p-4 p-md-5 rounded-xl shadow-lg border border-white border-opacity-10 animate-slide-up">
-                            <div className="text-center mb-4">
-                                <div className="d-inline-flex align-items-center justify-content-center bg-auction-primary bg-opacity-20 p-3 rounded-circle mb-3 text-auction-primary">
-                                    <FaLock size={24} />
-                                </div>
-                                <h2 className="fw-bold text-white mb-2">Verify OTP</h2>
-                                <p className="text-white-50 small">
-                                    Enter the 6-digit code sent to <br />
-                                    <span className="text-white fw-medium">{email}</span>
-                                </p>
-                            </div>
-
-                            {/* Error handled by Toast */}
-
-                            <Form onSubmit={handleSubmit}>
-                                <Form.Group className="mb-4">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Enter OTP Code"
-                                        value={otp}
-                                        onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                        className="bg-black bg-opacity-50 border-secondary border-opacity-25 text-white text-center text-spacing-2 fs-4 py-3"
-                                        style={{ letterSpacing: '0.5rem' }}
-                                        required
-                                        maxLength={6}
-                                    />
-                                </Form.Group>
-
-                                <Button
-                                    type="submit"
-                                    className="w-100 py-3 fw-bold shadow-lg hover-scale"
-                                    disabled={isLoading || otp.length !== 6}
-                                >
-                                    {isLoading ? 'Verifying...' : 'Verify Account'}
-                                </Button>
-                            </Form>
-
-                            <div className="text-center mt-4">
-                                <p className="text-white-50 small mb-0">
-                                    Didn't receive code?{' '}
-                                    <button className="btn btn-link text-auction-primary p-0 text-decoration-none small fw-bold">
-                                        Resend
-                                    </button>
-                                </p>
-                            </div>
+        <div className="container-fluid min-vh-100 auction-bg-pattern">
+            <div className="row">
+                {/* Left Side - Hero/Branding */}
+                <div className="col-lg-7 d-none d-lg-flex flex-column justify-content-center align-items-center position-relative p-0" style={{ minHeight: '100vh' }}>
+                    <div className="position-absolute w-100 h-100" style={{
+                        backgroundImage: "url('/login_bg.jpg')",
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        filter: 'brightness(0.4) sepia(0.2)',
+                        zIndex: 0
+                    }}></div>
+                    <div className="position-relative z-1 text-center p-5 animate-fade-in">
+                        <div className="display-1 text-auction-primary mb-3">
+                            <FaLock />
                         </div>
-                    </Col>
-                </Row>
-            </Container>
+                        <h1 className="display-3 fw-bold text-white mb-2">Security Check</h1>
+                        <p className="lead text-light opacity-75">Protecting your account with secure verification.</p>
+                    </div>
+                </div>
+
+                {/* Right Side - OTP Form */}
+                <div className="col-lg-5 col-12 d-flex align-items-center justify-content-center p-4">
+                    <div className="glass-panel p-5 rounded-4 w-100 animate-fade-in" style={{ maxWidth: '500px' }}>
+                        <div className="text-center mb-4">
+                            <h2 className="fw-bold text-white">Verify OTP</h2>
+                            <p className="text-white-50">
+                                Enter the 6-digit code sent to <br />
+                                <span className="text-white fw-medium">{email}</span>
+                            </p>
+                        </div>
+
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group className="mb-4">
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter OTP Code"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    className="bg-black bg-opacity-50 border-secondary border-opacity-25 text-white text-center text-spacing-2 fs-4 py-3"
+                                    style={{ letterSpacing: '0.5rem' }}
+                                    required
+                                    maxLength={6}
+                                />
+                            </Form.Group>
+
+                            <Button
+                                type="submit"
+                                className="w-100 py-3 fw-bold shadow-lg hover-scale"
+                                disabled={isLoading || otp.length !== 6}
+                            >
+                                {isLoading ? 'Verifying...' : 'Verify Account'}
+                            </Button>
+                        </Form>
+
+                        <div className="text-center mt-4">
+                            <p className="text-white-50 small mb-0">
+                                Didn't receive code?{' '}
+                                <button className="btn btn-link text-auction-primary p-0 text-decoration-none small fw-bold">
+                                    Resend
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

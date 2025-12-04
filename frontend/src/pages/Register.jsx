@@ -45,10 +45,10 @@ export default function Register() {
     }
 
     return (
-        <div className="container-fluid vh-100 auction-bg-pattern overflow-hidden">
-            <div className="row h-100">
+        <div className="container-fluid min-vh-100 auction-bg-pattern">
+            <div className="row">
                 {/* Left Side - Hero/Branding */}
-                <div className="col-lg-7 d-none d-lg-flex flex-column justify-content-center align-items-center position-relative p-0">
+                <div className="col-lg-7 d-none d-lg-flex flex-column justify-content-center align-items-center position-relative p-0" style={{ minHeight: '100vh' }}>
                     <div className="position-absolute w-100 h-100" style={{
                         backgroundImage: "url('/login_bg.jpg')",
                         backgroundSize: 'cover',
@@ -66,7 +66,7 @@ export default function Register() {
                 </div>
 
                 {/* Right Side - Register Form */}
-                <div className="col-lg-5 col-12 d-flex align-items-center justify-content-center p-4 overflow-auto">
+                <div className="col-lg-5 col-12 d-flex align-items-center justify-content-center p-4">
                     <div className="glass-panel p-5 rounded-4 w-100 animate-fade-in" style={{ maxWidth: '500px' }}>
                         <div className="text-center mb-4">
                             <h2 className="fw-bold text-white">Create Account</h2>

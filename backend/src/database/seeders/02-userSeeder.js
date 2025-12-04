@@ -26,6 +26,9 @@ export const up = async (queryInterface, Sequelize) => {
         });
 
         console.log('User seeded successfully.');
+
+        // Reset the ID sequence to avoid unique constraint errors
+        await queryInterface.sequelize.query(`SELECT setval('"Users_id_seq"', (SELECT MAX(id) FROM "Users"))`);
     } catch (error) {
         console.error('Error seeding users:', error);
     }
