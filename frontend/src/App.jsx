@@ -9,9 +9,8 @@ import ProductDetail from './pages/ProductDetail';
 import { ToastProvider } from './contexts/ToastContext';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import TopNavBar from './components/TopNavBar';
-
-
 import SearchResults from './pages/SearchResults';
+import AllProducts from './pages/AllProducts';
 
 const AppContent = () => {
   const location = useLocation();
@@ -29,6 +28,7 @@ const AppContent = () => {
         <Route path="/category/:id" element={<CategoryProducts />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/products" element={<AllProducts />} />
       </Routes>
     </>
   )

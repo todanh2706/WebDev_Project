@@ -122,9 +122,14 @@ export default {
                         attributes: ['image_url'],
                         where: { is_thumbnail: true },
                         required: false
+                    },
+                    {
+                        model: db.Users,
+                        as: 'current_winner',
+                        attributes: ['name']
                     }
                 ],
-                group: ['Products.id', 'images.id'],
+                group: ['Products.id', 'images.id', 'current_winner.id'],
                 order: order,
                 limit: limit,
                 offset: offset,
@@ -174,9 +179,14 @@ export default {
                         model: db.Categories,
                         as: 'category',
                         attributes: ['id', 'name']
+                    },
+                    {
+                        model: db.Users,
+                        as: 'current_winner',
+                        attributes: ['name']
                     }
                 ],
-                group: ['Products.id', 'images.id', 'seller.id', 'category.id']
+                group: ['Products.id', 'images.id', 'seller.id', 'category.id', 'current_winner.id']
             });
 
             if (!product) {
@@ -187,6 +197,66 @@ export default {
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error fetching product details' });
+        }
+    },
+
+    getAll: async (req, res) => {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 12;
+            const sort = req.query.sort || 'default';
+            const offset = (page - 1) * limit;
+
+            let order = [['createdAt', 'DESC']];
+            if (sort === 'price_asc') {
+                order = [['current_price', 'ASC']];
+            } else if (sort === 'time_desc') {
+                order = [['end_date', 'DESC']];
+            }
+
+            const products = await Products.findAll({
+                attributes: {
+                    include: [
+                        [db.sequelize.fn('COUNT', db.sequelize.col('bids.bid_id')), 'bid_count']
+                    ]
+                },
+                include: [
+                    {
+                        model: Bid,
+                        as: 'bids',
+                        attributes: []
+                    },
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url'],
+                        where: { is_thumbnail: true },
+                        required: false
+                    },
+                    {
+                        model: db.Users,
+                        as: 'current_winner',
+                        attributes: ['name']
+                    }
+                ],
+                group: ['Products.id', 'images.id', 'current_winner.id'],
+                order: order,
+                limit: limit,
+                offset: offset,
+                subQuery: false
+            });
+
+            const totalItems = await Products.count();
+
+            res.json({
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                products: products
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching all products' });
         }
     },
 
@@ -229,9 +299,14 @@ export default {
                         attributes: ['image_url'],
                         where: { is_thumbnail: true },
                         required: false
+                    },
+                    {
+                        model: db.Users,
+                        as: 'current_winner',
+                        attributes: ['name']
                     }
                 ],
-                group: ['Products.id', 'images.id'],
+                group: ['Products.id', 'images.id', 'current_winner.id'],
                 order: order,
                 limit: limit,
                 offset: offset,

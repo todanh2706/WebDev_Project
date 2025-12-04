@@ -88,7 +88,7 @@ const TopNavBar = () => {
                             onMouseLeave={() => setShowMegaMenu(false)}
                         >
                             <Link
-                                to="#"
+                                to="/products"
                                 className={`nav-link nav-link-auction mx-2 ${showMegaMenu ? 'active' : ''}`}
                                 role="button"
                             >

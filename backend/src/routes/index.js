@@ -10,6 +10,7 @@ export default (app) => {
     app.post('/api/verify-otp', AuthController.verifyOTP);
 
     // Product Routes
+    app.get('/api/products', ProductController.getAll);
     app.get('/api/products/latest-bidded', ProductController.getLatestBidded);
     app.get('/api/products/most-bidded', ProductController.getMostBidded);
     app.get('/api/products/highest-price', ProductController.getHighestPrice);
