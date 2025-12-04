@@ -167,4 +167,43 @@ export default {
         }
     },
 
+    search: async (req, res) => {
+        try {
+            const { q } = req.query;
+            if (!q) {
+                return res.status(400).json({ message: 'Search query is required' });
+            }
+
+            const products = await Products.findAll({
+                where: db.sequelize.literal(`"full_text_search" @@ plainto_tsquery('english', :query)`),
+                replacements: { query: q },
+                attributes: {
+                    include: [
+                        [db.sequelize.fn('COUNT', db.sequelize.col('bids.bid_id')), 'bid_count']
+                    ]
+                },
+                include: [
+                    {
+                        model: Bid,
+                        as: 'bids',
+                        attributes: []
+                    },
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url'],
+                        where: { is_thumbnail: true },
+                        required: false
+                    }
+                ],
+                group: ['Products.id', 'images.id'],
+                order: [['createdAt', 'DESC']]
+            });
+            res.json(products);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error searching products' });
+        }
+    },
+
 };

@@ -11,6 +11,8 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import TopNavBar from './components/TopNavBar';
 
 
+import SearchResults from './pages/SearchResults';
+
 const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-otp';
@@ -26,6 +28,7 @@ const AppContent = () => {
         <Route path="/verify-otp" element={<OTPVerification />} />
         <Route path="/category/:id" element={<CategoryProducts />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/search" element={<SearchResults />} />
       </Routes>
     </>
   )

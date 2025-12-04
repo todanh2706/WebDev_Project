@@ -51,6 +51,19 @@ const TopNavBar = () => {
         navigate('/login');
     };
 
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleSearch = (e) => {
+        console.log('Search event triggered:', e.type, e.key);
+        if (e.key === 'Enter' || e.type === 'click') {
+            console.log('Search query:', searchQuery);
+            if (searchQuery.trim()) {
+                console.log('Navigating to:', `/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            }
+        }
+    };
+
     return (
         <Navbar expand="lg" className="navbar-auction fixed-top" variant="dark">
             <Container>
@@ -123,7 +136,10 @@ const TopNavBar = () => {
 
                     <div className="d-flex align-items-center mx-3 flex-grow-1" style={{ maxWidth: '400px' }}>
                         <div className="input-group glass-search-group">
-                            <span className="input-group-text bg-transparent border-end-0 text-auction-primary">
+                            <span
+                                className="input-group-text bg-transparent border-end-0 text-auction-primary cursor-pointer"
+                                onClick={handleSearch}
+                            >
                                 <FaSearch />
                             </span>
                             <input
@@ -131,6 +147,9 @@ const TopNavBar = () => {
                                 className="form-control bg-transparent border-start-0 text-white placeholder-white-50"
                                 placeholder="Search for products..."
                                 aria-label="Search"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={handleSearch}
                             />
                         </div>
                     </div>
