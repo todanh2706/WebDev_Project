@@ -116,6 +116,14 @@ export const up = async (queryInterface, Sequelize) => {
             });
         }
 
+        // Fetch a valid user ID to use as seller
+        const seller = await db.Users.findOne();
+        if (!seller) {
+            console.error('No users found. Please seed users first.');
+            return;
+        }
+        const sellerId = seller.id;
+
         for (const prod of dummyProducts) {
             const product = await Products.create({
                 name: prod.name,
@@ -123,7 +131,7 @@ export const up = async (queryInterface, Sequelize) => {
                 starting_price: prod.starting_price,
                 current_price: prod.current_price,
                 end_date: prod.end_date,
-                seller_id: 1, // Assuming user with ID 1 exists
+                seller_id: sellerId,
                 category_id: prod.category_id || 1,
                 status: 'active',
                 buy_now_price: prod.current_price * 1.5,

@@ -20,7 +20,7 @@ export const up = async (queryInterface, Sequelize) => {
             password: hashedPassword,
             phone: '1234567890',
             address: '123 Admin St',
-            role: 'admin',
+            role: 2, // 2: admin
             status: 'active',
             is_verified: true
         });

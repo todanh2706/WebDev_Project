@@ -11,3 +11,9 @@ sequelize model:generate --name User --attributes name:string,email:string,phone
 ```
 docker-compose exec backend npx sequelize-cli db:migrate
 ```
+
+### Command to seed the db
+
+```
+docker-compose exec backend npx sequelize-cli db:seed:all
+```
