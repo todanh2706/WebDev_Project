@@ -16,13 +16,13 @@ const CategoryProducts = () => {
             setLoading(true);
             try {
                 // Fetch products by category
-                const productsResponse = await fetch(`http://localhost:8080/api/products/category/${id}`);
+                const productsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/category/${id}`);
                 if (!productsResponse.ok) throw new Error('Failed to fetch products');
                 const productsData = await productsResponse.json();
                 setProducts(productsData);
 
                 // Fetch category details
-                const categoryResponse = await fetch(`http://localhost:8080/api/categories/${id}`);
+                const categoryResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/${id}`);
                 if (categoryResponse.ok) {
                     const categoryData = await categoryResponse.json();
                     setCategoryName(categoryData.name);
