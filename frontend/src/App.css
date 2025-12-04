@@ -518,3 +518,37 @@ body {
         transform: translateX(100%) scale(0.95);
     }
 }
+
+/* Navbar Search Bar */
+.glass-search-group {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.glass-search-group:focus-within {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: var(--auction-primary);
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+}
+
+.glass-search-group .input-group-text,
+.glass-search-group .form-control {
+    border: none;
+    background: transparent;
+}
+
+.glass-search-group .input-group-text {
+    padding-left: 1.25rem;
+}
+
+.glass-search-group .form-control:focus {
+    box-shadow: none;
+    background: transparent;
+}
+
+.glass-search-group input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}

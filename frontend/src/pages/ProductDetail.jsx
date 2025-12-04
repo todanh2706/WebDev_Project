@@ -19,7 +19,7 @@ const ProductDetail = () => {
         const fetchProduct = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:8080/api/products/${id}`);
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/${id}`);
                 if (!response.ok) throw new Error('Failed to fetch product');
                 const data = await response.json();
                 setProduct(data);

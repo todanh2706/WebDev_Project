@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import Button from './Button';
 import {
     FaUserCircle, FaGavel, FaSignOutAlt, FaUser, FaChevronRight,
-    FaMobileAlt, FaLaptop, FaHeadphones, FaCamera, FaHome, FaGamepad, FaTshirt
+    FaMobileAlt, FaLaptop, FaHeadphones, FaCamera, FaHome, FaGamepad, FaTshirt, FaSearch
 } from 'react-icons/fa';
 
 const TopNavBar = () => {
@@ -120,6 +120,20 @@ const TopNavBar = () => {
 
                         <Nav.Link as={Link} to="/myauctions" className="nav-link-auction mx-2">My Auctions</Nav.Link>
                     </Nav>
+
+                    <div className="d-flex align-items-center mx-3 flex-grow-1" style={{ maxWidth: '400px' }}>
+                        <div className="input-group glass-search-group">
+                            <span className="input-group-text bg-transparent border-end-0 text-auction-primary">
+                                <FaSearch />
+                            </span>
+                            <input
+                                type="text"
+                                className="form-control bg-transparent border-start-0 text-white placeholder-white-50"
+                                placeholder="Search for products..."
+                                aria-label="Search"
+                            />
+                        </div>
+                    </div>
 
                     <Nav className="align-items-center gap-3">
                         {user ? (
