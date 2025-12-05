@@ -31,14 +31,32 @@ const ProductCard = ({ product }) => {
         });
     };
 
+    const isNew = (dateString) => {
+        const postDate = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - postDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= 2;
+    };
+
     return (
-        <Card className="h-100 border-0 glass-panel-dark text-white overflow-hidden shadow-sm hover-scale">
+        <Card className={`h-100 border-0 glass-panel-dark text-white overflow-hidden shadow-sm hover-scale ${isNew(post_date) ? 'card-new' : ''}`}>
             <div className="position-relative" style={{ height: '220px' }}>
                 <Card.Img
                     variant="top"
                     src={imageUrl}
                     className="w-100 h-100 object-fit-cover"
                 />
+
+                {/* New Badge */}
+                {isNew(post_date) && (
+                    <div className="position-absolute top-0 start-0 p-2">
+                        <span className="badge badge-new shadow-sm">
+                            NEW
+                        </span>
+                    </div>
+                )}
+
                 {/* Status Badge */}
                 <div className="position-absolute top-0 end-0 p-2">
                     <span className="badge bg-black bg-opacity-75 backdrop-blur border border-secondary border-opacity-25 py-2 px-3 rounded-pill">

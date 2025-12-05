@@ -552,3 +552,30 @@ body {
 .glass-search-group input::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
+
+/* New Product Highlight */
+.card-new {
+    border: 1px solid var(--auction-primary) !important;
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.15) !important;
+}
+
+.card-new:hover {
+    box-shadow: 0 0 25px rgba(218, 165, 32, 0.3) !important;
+}
+
+.badge-new {
+    background: linear-gradient(45deg, var(--auction-primary), var(--auction-dark));
+    color: #000;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 0.5em 0.8em;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure options in yellow selects are also yellow with dark background */
+select.text-auction-primary option {
+    color: var(--auction-primary);
+    background-color: #000;
+}

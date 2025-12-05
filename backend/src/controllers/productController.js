@@ -96,7 +96,7 @@ export default {
             const sort = req.query.sort || 'default';
             const offset = (page - 1) * limit;
 
-            let order = [['createdAt', 'DESC']];
+            let order = [['post_date', 'DESC']];
             if (sort === 'price_asc') {
                 order = [['current_price', 'ASC']];
             } else if (sort === 'time_desc') {
@@ -207,7 +207,7 @@ export default {
             const sort = req.query.sort || 'default';
             const offset = (page - 1) * limit;
 
-            let order = [['createdAt', 'DESC']];
+            let order = [['post_date', 'DESC']];
             if (sort === 'price_asc') {
                 order = [['current_price', 'ASC']];
             } else if (sort === 'time_desc') {
@@ -272,7 +272,7 @@ export default {
                 return res.status(400).json({ message: 'Search query is required' });
             }
 
-            let order = [['createdAt', 'DESC']];
+            let order = [['post_date', 'DESC']];
             if (sort === 'price_asc') {
                 order = [['current_price', 'ASC']];
             } else if (sort === 'time_desc') {

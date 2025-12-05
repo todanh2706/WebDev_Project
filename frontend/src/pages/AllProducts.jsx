@@ -61,7 +61,7 @@ const AllProducts = () => {
                         <Form.Select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="bg-black text-white border-secondary"
+                            className="bg-black text-auction-primary border-secondary"
                             style={{ width: 'auto', minWidth: '200px' }}
                         >
                             <option value="default">Newest First</option>
