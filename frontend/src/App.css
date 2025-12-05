@@ -579,3 +579,44 @@ select.text-auction-primary option {
     color: var(--auction-primary);
     background-color: #000;
 }
+
+/* Profile Page Styles */
+.profile-nav .nav-link {
+    border-radius: 8px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.profile-nav .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.profile-nav .nav-link.active {
+    background-color: var(--auction-primary) !important;
+    color: #000 !important;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.4);
+}
+
+/* Active Tab Panel Styling */
+.glass-panel-active-tab {
+    border: 1px solid rgba(218, 165, 32, 0.3);
+    box-shadow: 0 0 20px rgba(218, 165, 32, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Custom Placeholder Styling for Profile */
+.custom-placeholder-input {
+    color: rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.3s ease;
+}
+
+.custom-placeholder-input:focus {
+    color: #fff !important;
+}
+
+.custom-placeholder-input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+}

@@ -34,7 +34,7 @@ export default (sequelize, DataTypes) => {
             allowNull: false
         },
         rating: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.ENUM('good', 'bad'),
             allowNull: false
         }
     });

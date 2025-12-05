@@ -140,8 +140,29 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const fetchWithAuth = async (url, options = {}) => {
+        let currentToken = localStorage.getItem("accessToken");
+        const headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${currentToken}`
+        };
+
+        let response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) {
+            const refreshSuccess = await refreshAccessToken();
+            if (refreshSuccess) {
+                const newToken = localStorage.getItem("accessToken");
+                headers['Authorization'] = `Bearer ${newToken}`;
+                response = await fetch(url, { ...options, headers });
+            }
+        }
+
+        return response;
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout, verifyOTP }}>
+        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout, verifyOTP, fetchWithAuth }}>
             {children}
         </AuthContext.Provider>
     )

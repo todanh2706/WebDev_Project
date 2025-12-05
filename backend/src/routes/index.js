@@ -1,6 +1,7 @@
 import AuthController from '../controllers/authControllers.js'
 import ProductController from '../controllers/productController.js'
 import CategoryController from '../controllers/categoryController.js'; // Added import for CategoryController
+import UserController from '../controllers/userController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 
 export default (app) => {
@@ -20,6 +21,14 @@ export default (app) => {
     // Category Routes
     app.get('/api/categories', CategoryController.getAll); // Added new route for categories
     app.get('/api/categories/:id', CategoryController.getById);
+
+    // User Routes
+    app.get('/api/user/profile', authenticateToken, UserController.getProfile);
+    app.put('/api/user/profile', authenticateToken, UserController.updateProfile);
+    app.get('/api/user/watchlist', authenticateToken, UserController.getWatchlist);
+    app.get('/api/user/participating', authenticateToken, UserController.getParticipatingAuctions);
+    app.get('/api/user/won', authenticateToken, UserController.getWonAuctions);
+    app.get('/api/user/ratings', authenticateToken, UserController.getRatings);
 
     app.get('/', (req, res) => {
         res.send('Backend is running!');

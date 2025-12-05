@@ -11,6 +11,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import TopNavBar from './components/TopNavBar';
 import SearchResults from './pages/SearchResults';
 import AllProducts from './pages/AllProducts';
+import Profile from './pages/Profile';
 
 const AppContent = () => {
   const location = useLocation();
@@ -29,6 +30,7 @@ const AppContent = () => {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/products" element={<AllProducts />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </>
   )
