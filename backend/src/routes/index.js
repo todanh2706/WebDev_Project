@@ -27,6 +27,8 @@ export default (app) => {
     app.get('/api/user/profile', authenticateToken, UserController.getProfile);
     app.put('/api/user/profile', authenticateToken, UserController.updateProfile);
     app.get('/api/user/watchlist', authenticateToken, UserController.getWatchlist);
+    app.post('/api/user/watchlist', authenticateToken, UserController.addToWatchlist);
+    app.delete('/api/user/watchlist/:productId', authenticateToken, UserController.removeFromWatchlist);
     app.get('/api/user/participating', authenticateToken, UserController.getParticipatingAuctions);
     app.get('/api/user/won', authenticateToken, UserController.getWonAuctions);
     app.get('/api/user/ratings', authenticateToken, UserController.getRatings);

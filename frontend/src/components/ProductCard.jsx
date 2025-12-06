@@ -2,11 +2,30 @@ import React from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Button from './Button';
-import { FaEye, FaClock } from 'react-icons/fa';
+import { useWatchlist } from '../contexts/WatchlistContext';
+import { FaEye, FaClock, FaHeart, FaRegHeart } from 'react-icons/fa';
 
-const ProductCard = ({ product }) => {
-    const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date } = product;
+const ProductCard = ({ product, onWatchlistChange }) => {
+    const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date, id } = product;
     const imageUrl = images && images.length > 0 ? images[0].image_url : 'https://placehold.co/600x400?text=No+Image';
+
+    const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
+    const isWatched = isInWatchlist(id);
+
+    const handleWatchlistClick = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        let success;
+        if (isWatched) {
+            success = await removeFromWatchlist(id);
+        } else {
+            success = await addToWatchlist(id);
+        }
+
+        if (success && onWatchlistChange) {
+            onWatchlistChange();
+        }
+    };
 
     const formatTimeLeft = (endTime) => {
         const total = Date.parse(endTime) - Date.parse(new Date());
@@ -57,8 +76,32 @@ const ProductCard = ({ product }) => {
                     </div>
                 )}
 
+                {/* Watchlist Button */}
+                <div className="position-absolute top-0 end-0 p-2 z-2">
+                    <button
+                        className="btn btn-icon rounded-circle bg-black bg-opacity-50 text-white backdrop-blur shadow-sm d-flex align-items-center justify-content-center watchlist-btn"
+                        style={{ width: '50px', height: '50px', border: '1px solid #ffc107' }}
+                        onClick={handleWatchlistClick}
+                        title={isWatched ? "Remove from Watchlist" : "Add to Watchlist"}
+                    >
+                        {isWatched ? <FaHeart className="text-danger" /> : <FaRegHeart />}
+                    </button>
+                    <style>
+                        {`
+                            .watchlist-btn:hover {
+                                background-color: #ffc107 !important;
+                                border-color: #343a40 !important;
+                                color: #343a40 !important;
+                            }
+                            .watchlist-btn:hover svg {
+                                color: #343a40 !important;
+                            }
+                        `}
+                    </style>
+                </div>
+
                 {/* Status Badge */}
-                <div className="position-absolute top-0 end-0 p-2">
+                <div className="position-absolute bottom-0 end-0 p-2">
                     <span className="badge bg-black bg-opacity-75 backdrop-blur border border-secondary border-opacity-25 py-2 px-3 rounded-pill">
                         <FaClock className="me-2 text-auction-primary" />
                         {formatTimeLeft(end_date)}

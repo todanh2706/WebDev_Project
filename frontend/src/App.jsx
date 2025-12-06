@@ -36,12 +36,16 @@ const AppContent = () => {
   )
 }
 
+import { WatchlistProvider } from './contexts/WatchlistContext';
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <AppContent />
+          <WatchlistProvider>
+            <AppContent />
+          </WatchlistProvider>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

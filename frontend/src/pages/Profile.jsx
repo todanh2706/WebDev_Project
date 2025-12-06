@@ -17,7 +17,8 @@ const Profile = () => {
         won,
         ratings,
         updateProfile,
-        changePassword
+        changePassword,
+        refreshData
     } = useProfile();
 
     if (loading) {
@@ -79,7 +80,7 @@ const Profile = () => {
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="watchlist">
-                                        <ProductGrid products={watchlist} emptyMessage="Your watchlist is empty." />
+                                        <ProductGrid products={watchlist} emptyMessage="Your watchlist is empty." onWatchlistChange={refreshData} />
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="participating">

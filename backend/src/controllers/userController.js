@@ -156,5 +156,67 @@ export default {
             console.error(error);
             res.status(500).json({ message: 'Error fetching ratings' });
         }
+    },
+
+    addToWatchlist: async (req, res) => {
+        try {
+            const { productId } = req.body;
+            const userId = req.user.id;
+
+            if (!productId) {
+                return res.status(400).json({ message: 'Product ID is required' });
+            }
+
+            // Check if product exists
+            const product = await Products.findByPk(productId);
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            // Check if already in watchlist
+            const existing = await Watchlist.findOne({
+                where: {
+                    user_id: userId,
+                    product_id: productId
+                }
+            });
+
+            if (existing) {
+                return res.status(400).json({ message: 'Product already in watchlist' });
+            }
+
+            await Watchlist.create({
+                user_id: userId,
+                product_id: productId
+            });
+
+            res.status(201).json({ message: 'Added to watchlist' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error adding to watchlist' });
+        }
+    },
+
+    removeFromWatchlist: async (req, res) => {
+        try {
+            const { productId } = req.params;
+            const userId = req.user.id;
+
+            const deleted = await Watchlist.destroy({
+                where: {
+                    user_id: userId,
+                    product_id: productId
+                }
+            });
+
+            if (!deleted) {
+                return res.status(404).json({ message: 'Item not found in watchlist' });
+            }
+
+            res.json({ message: 'Removed from watchlist' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error removing from watchlist' });
+        }
     }
 };
