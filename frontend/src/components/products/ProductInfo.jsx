@@ -1,0 +1,69 @@
+import React from 'react';
+import { Badge } from 'react-bootstrap';
+import Button from '../common/Button';
+import { FaTag, FaUser, FaShieldAlt, FaGavel } from 'react-icons/fa';
+
+const ProductInfo = ({ product, onPlaceBid }) => {
+    if (!product) return null;
+
+    return (
+        <div className="glass-panel p-4 rounded-4 mb-4">
+            <div className="d-flex align-items-center gap-2 mb-3">
+                <Badge bg="warning" text="dark" className="px-3 py-2 rounded-pill fw-bold">
+                    Lot #{product.id}
+                </Badge>
+                {product.category && (
+                    <Badge bg="secondary" className="bg-opacity-50 px-3 py-2 rounded-pill">
+                        <FaTag className="me-2" />
+                        {product.category.name}
+                    </Badge>
+                )}
+            </div>
+
+            <h1 className="text-white fw-bold mb-2">{product.name}</h1>
+
+            {product.seller && (
+                <div className="d-flex align-items-center gap-2 mb-4 text-white-50">
+                    <FaUser className="text-auction-primary" />
+                    <span>Seller: <span className="text-white">{product.seller.name}</span></span>
+                    <span className="mx-2">•</span>
+                    <FaShieldAlt className="text-success" />
+                    <span>Verified Seller</span>
+                </div>
+            )}
+
+            <div className="p-4 rounded-4 bg-black bg-opacity-25 border border-white border-opacity-10 mb-4">
+                <div className="row g-4">
+                    <div className="col-6">
+                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Current Price</small>
+                        <span className="h2 text-auction-primary fw-bold mb-0">
+                            ${parseFloat(product.current_price).toLocaleString()}
+                        </span>
+                    </div>
+                    <div className="col-6 border-start border-white border-opacity-10 ps-4">
+                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Total Bids</small>
+                        <span className="h2 text-white fw-bold mb-0">
+                            {product.bid_count || 0}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="d-grid gap-3">
+                <Button
+                    className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
+                    onClick={onPlaceBid}
+                >
+                    <FaGavel /> Place Bid
+                </Button>
+                {product.buy_now_price && (
+                    <Button variant="outline-light" className="py-3 fw-bold rounded-pill border-opacity-25">
+                        Buy Now for ${parseFloat(product.buy_now_price).toLocaleString()}
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+};
+
+export default ProductInfo;

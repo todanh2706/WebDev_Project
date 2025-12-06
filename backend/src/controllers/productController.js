@@ -330,4 +330,57 @@ export default {
         }
     },
 
+    placeBid: async (req, res) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const { id } = req.params;
+            const { amount } = req.body;
+            const userId = req.user.id;
+
+            const product = await Products.findByPk(id, { lock: true, transaction: t });
+
+            if (!product) {
+                await t.rollback();
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            if (product.seller_id === userId) {
+                await t.rollback();
+                return res.status(400).json({ message: 'You cannot bid on your own product' });
+            }
+
+            if (new Date(product.end_date) < new Date()) {
+                await t.rollback();
+                return res.status(400).json({ message: 'Auction has ended' });
+            }
+
+            if (parseFloat(amount) <= parseFloat(product.current_price)) {
+                await t.rollback();
+                return res.status(400).json({ message: 'Bid amount must be higher than current price' });
+            }
+
+            // Create bid
+            await Bid.create({
+                bidder_id: userId,
+                product_id: id,
+                amount: amount,
+                max_bid_amount: amount, // Assuming simple bidding for now
+                bid_time: new Date()
+            }, { transaction: t });
+
+            // Update product
+            await product.update({
+                current_price: amount,
+                current_winner_id: userId
+            }, { transaction: t });
+
+            await t.commit();
+            res.json({ message: 'Bid placed successfully' });
+        } catch (error) {
+            await t.rollback();
+            console.error(error);
+            res.status(500).json({ message: 'Error placing bid' });
+        }
+    },
+
 };

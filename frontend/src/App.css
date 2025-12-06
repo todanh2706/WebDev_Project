@@ -661,3 +661,32 @@ select.text-auction-primary option {
 .view-details-btn:hover {
     color: white !important;
 }
+
+/* Bid Panel Styles */
+.glass-panel-yellow {
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.95), rgba(40, 35, 10, 0.9));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(218, 165, 32, 0.3);
+    box-shadow: 0 10px 40px -5px rgba(0, 0, 0, 0.7), 0 0 30px rgba(218, 165, 32, 0.1);
+}
+
+.no-spinners::-webkit-outer-spin-button,
+.no-spinners::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.no-spinners[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.placeholder-yellow::placeholder {
+    color: var(--auction-primary) !important;
+    opacity: 0.8;
+}
+
+.placeholder-yellow:focus::placeholder {
+    opacity: 0.5;
+}

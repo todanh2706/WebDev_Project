@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Image, Badge, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import Button from '../components/common/Button';
 import { productService } from '../services/productService';
+import { userService } from '../services/userService';
 import { useToast } from '../contexts/ToastContext';
-import { FaClock, FaGavel, FaUser, FaTag, FaShieldAlt, FaArrowLeft } from 'react-icons/fa';
+import { FaShieldAlt, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../hooks/useAuth';
+import ImageGallery from '../components/products/ImageGallery';
+import ProductInfo from '../components/products/ProductInfo';
+import BidModal from '../components/products/BidModal';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -13,6 +17,10 @@ const ProductDetail = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [showBidModal, setShowBidModal] = useState(false);
+    const [bidAmount, setBidAmount] = useState('');
+    const [userRatingScore, setUserRatingScore] = useState(null);
+    const [placingBid, setPlacingBid] = useState(false);
     const { showToast } = useToast();
     const { user } = useAuth();
 
@@ -33,15 +41,63 @@ const ProductDetail = () => {
             }
         };
 
-        fetchProduct();
-    }, [id, showToast]);
+        const fetchUserRatings = async () => {
+            if (user) {
+                try {
+                    const ratings = await userService.getRatings();
+                    if (ratings.length === 0) {
+                        setUserRatingScore(100); // New users are eligible
+                    } else {
+                        const goodRatings = ratings.filter(r => r.rating === 'good').length;
+                        const score = (goodRatings / ratings.length) * 100;
+                        setUserRatingScore(score);
+                    }
+                } catch (error) {
+                    console.error('Error fetching ratings:', error);
+                }
+            }
+        };
 
-    const formatTimeLeft = (endTime) => {
-        const total = Date.parse(endTime) - Date.parse(new Date());
-        if (total <= 0) return 'Ended';
-        const days = Math.floor(total / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-        return `${days}d ${hours}h left`;
+        fetchProduct();
+        fetchUserRatings();
+    }, [id, showToast, user]);
+
+    const handlePlaceBidClick = () => {
+        if (!user) {
+            showToast('Please login to place a bid', 'warning');
+            navigate('/login');
+            return;
+        }
+
+        if (userRatingScore !== null && userRatingScore < 80) {
+            showToast(`You are not eligible to bid. Your rating score is ${userRatingScore.toFixed(1)}% (Min: 80%)`, 'error');
+            return;
+        }
+
+        setBidAmount('');
+        setShowBidModal(true);
+    };
+
+    const handleBidSubmit = async (e) => {
+        e.preventDefault();
+        if (!bidAmount || isNaN(bidAmount) || parseFloat(bidAmount) <= parseFloat(product.current_price)) {
+            showToast('Bid amount must be greater than current price', 'error');
+            return;
+        }
+
+        setPlacingBid(true);
+        try {
+            await productService.placeBid(product.id, parseFloat(bidAmount));
+            showToast('Bid placed successfully!', 'success');
+            setShowBidModal(false);
+            // Refresh product data
+            const updatedProduct = await productService.getProductById(id);
+            setProduct(updatedProduct);
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to place bid', 'error');
+        } finally {
+            setPlacingBid(false);
+        }
     };
 
     if (loading) {
@@ -77,38 +133,13 @@ const ProductDetail = () => {
                 <Row className="g-5">
                     {/* Image Gallery */}
                     <Col lg={7}>
-                        <div className="glass-panel p-3 rounded-4 mb-4">
-                            <div className="position-relative rounded-3 overflow-hidden" style={{ height: '500px' }}>
-                                <Image
-                                    src={selectedImage || 'https://placehold.co/800x600?text=No+Image'}
-                                    className="w-100 h-100 object-fit-cover"
-                                    alt={product.name}
-                                />
-                                <div className="position-absolute top-0 end-0 p-3">
-                                    <Badge bg="black" className="bg-opacity-75 fs-6 py-2 px-3 rounded-pill border border-secondary border-opacity-25">
-                                        <FaClock className="me-2 text-auction-primary" />
-                                        {formatTimeLeft(product.end_date)}
-                                    </Badge>
-                                </div>
-                            </div>
-                            {product.images && product.images.length > 1 && (
-                                <div className="d-flex gap-3 mt-3 overflow-auto pb-2">
-                                    {product.images.map((img, idx) => (
-                                        <div
-                                            key={idx}
-                                            className={`cursor-pointer rounded-3 overflow-hidden border ${selectedImage === img.image_url ? 'border-auction-primary' : 'border-transparent'}`}
-                                            style={{ width: '100px', height: '100px', minWidth: '100px' }}
-                                            onClick={() => setSelectedImage(img.image_url)}
-                                        >
-                                            <Image
-                                                src={img.image_url}
-                                                className="w-100 h-100 object-fit-cover"
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <ImageGallery
+                            images={product.images}
+                            selectedImage={selectedImage}
+                            setSelectedImage={setSelectedImage}
+                            productName={product.name}
+                            endDate={product.end_date}
+                        />
 
                         <div className="glass-panel p-4 rounded-4">
                             <h4 className="text-white fw-bold mb-3">Description</h4>
@@ -120,59 +151,10 @@ const ProductDetail = () => {
 
                     {/* Product Info & Bidding */}
                     <Col lg={5}>
-                        <div className="glass-panel p-4 rounded-4 mb-4">
-                            <div className="d-flex align-items-center gap-2 mb-3">
-                                <Badge bg="warning" text="dark" className="px-3 py-2 rounded-pill fw-bold">
-                                    Lot #{product.id}
-                                </Badge>
-                                {product.category && (
-                                    <Badge bg="secondary" className="bg-opacity-50 px-3 py-2 rounded-pill">
-                                        <FaTag className="me-2" />
-                                        {product.category.name}
-                                    </Badge>
-                                )}
-                            </div>
-
-                            <h1 className="text-white fw-bold mb-2">{product.name}</h1>
-
-                            {product.seller && (
-                                <div className="d-flex align-items-center gap-2 mb-4 text-white-50">
-                                    <FaUser className="text-auction-primary" />
-                                    <span>Seller: <span className="text-white">{product.seller.name}</span></span>
-                                    <span className="mx-2">•</span>
-                                    <FaShieldAlt className="text-success" />
-                                    <span>Verified Seller</span>
-                                </div>
-                            )}
-
-                            <div className="p-4 rounded-4 bg-black bg-opacity-25 border border-white border-opacity-10 mb-4">
-                                <div className="row g-4">
-                                    <div className="col-6">
-                                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Current Price</small>
-                                        <span className="h2 text-auction-primary fw-bold mb-0">
-                                            ${parseFloat(product.current_price).toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <div className="col-6 border-start border-white border-opacity-10 ps-4">
-                                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Total Bids</small>
-                                        <span className="h2 text-white fw-bold mb-0">
-                                            {product.bid_count || 0}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="d-grid gap-3">
-                                <Button className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2">
-                                    <FaGavel /> Place Bid
-                                </Button>
-                                {product.buy_now_price && (
-                                    <Button variant="outline-light" className="py-3 fw-bold rounded-pill border-opacity-25">
-                                        Buy Now for ${parseFloat(product.buy_now_price).toLocaleString()}
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
+                        <ProductInfo
+                            product={product}
+                            onPlaceBid={handlePlaceBidClick}
+                        />
 
                         <div className="glass-panel p-4 rounded-4">
                             <h5 className="text-white fw-bold mb-3">Bidding Safety</h5>
@@ -194,6 +176,17 @@ const ProductDetail = () => {
                     </Col>
                 </Row>
             </Container>
+
+            {/* Bid Modal */}
+            <BidModal
+                show={showBidModal}
+                onHide={() => setShowBidModal(false)}
+                product={product}
+                onSubmit={handleBidSubmit}
+                bidAmount={bidAmount}
+                setBidAmount={setBidAmount}
+                placingBid={placingBid}
+            />
         </div>
     );
 };

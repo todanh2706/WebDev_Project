@@ -20,6 +20,7 @@ export default (app) => {
     app.get('/api/products/category/:id', ProductController.getByCategory);
     app.get('/api/products/search', ProductController.search);
     app.get('/api/products/:id', ProductController.getById);
+    app.post('/api/products/:id/bid', authenticateToken, ProductController.placeBid);
     // Category Routes
     app.get('/api/categories', CategoryController.getAll); // Added new route for categories
     app.get('/api/categories/:id', CategoryController.getById);

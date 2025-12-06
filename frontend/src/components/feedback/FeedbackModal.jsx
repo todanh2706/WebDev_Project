@@ -99,7 +99,7 @@ const FeedbackModal = ({ isOpen, onClose, onSubmit, productName, existingFeedbac
                         <div className="d-flex justify-content-end gap-2 pt-2">
                             <Button
                                 onClick={onClose}
-                                className="bg-transparent border border-secondary border-opacity-50 fw-bold text-danger hover:text-danger hover:bg-white hover:bg-opacity-10"
+                                className="btn-auction text-black fw-bold px-4"
                             >
                                 {existingFeedback ? 'Close' : 'Cancel'}
                             </Button>
