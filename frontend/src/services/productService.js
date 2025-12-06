@@ -44,5 +44,15 @@ export const productService = {
     getCategories: async () => {
         const response = await api.get('/categories');
         return response.data;
+    },
+
+    requestBidPermission: async (id) => {
+        const response = await api.post(`/products/${id}/bid-request`);
+        return response.data;
+    },
+
+    checkBidPermission: async (id) => {
+        const response = await api.get(`/products/${id}/bid-permission`);
+        return response.data;
     }
 };

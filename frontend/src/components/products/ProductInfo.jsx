@@ -3,7 +3,7 @@ import { Badge } from 'react-bootstrap';
 import Button from '../common/Button';
 import { FaTag, FaUser, FaShieldAlt, FaGavel } from 'react-icons/fa';
 
-const ProductInfo = ({ product, onPlaceBid }) => {
+const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequestPermission }) => {
     if (!product) return null;
 
     return (
@@ -50,12 +50,35 @@ const ProductInfo = ({ product, onPlaceBid }) => {
             </div>
 
             <div className="d-grid gap-3">
-                <Button
-                    className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
-                    onClick={onPlaceBid}
-                >
-                    <FaGavel /> Place Bid
-                </Button>
+                {isEligible || permissionStatus === 'approved' ? (
+                    <Button
+                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
+                        onClick={onPlaceBid}
+                    >
+                        <FaGavel /> Place Bid
+                    </Button>
+                ) : permissionStatus === 'pending' ? (
+                    <Button
+                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 bg-warning text-dark border-warning"
+                        disabled
+                    >
+                        <FaShieldAlt /> Request Pending
+                    </Button>
+                ) : permissionStatus === 'rejected' ? (
+                    <Button
+                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 bg-danger text-white border-danger"
+                        disabled
+                    >
+                        <FaShieldAlt /> Request Rejected
+                    </Button>
+                ) : (
+                    <Button
+                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
+                        onClick={onRequestPermission}
+                    >
+                        <FaShieldAlt /> Request Permission
+                    </Button>
+                )}
                 {product.buy_now_price && (
                     <Button variant="outline-light" className="py-3 fw-bold rounded-pill border-opacity-25">
                         Buy Now for ${parseFloat(product.buy_now_price).toLocaleString()}

@@ -61,19 +61,9 @@ export const AuthProvider = ({ children }) => {
 
     const refreshAccessToken = async () => {
         try {
-            const refreshToken = getCookie('refreshToken'); // Need a way to get cookie if not HttpOnly? 
-            // Wait, refresh token is HttpOnly cookie. Browser sends it automatically.
-            // But authService.refreshToken expects refreshToken in body?
-            // Let's check authService.js: `api.post('/refresh', { refreshToken })`
-            // And AuthController.js: `const refreshToken = req.cookies.refreshToken;`
-            // So backend expects cookie. Frontend shouldn't send it in body if it's HttpOnly.
-            // But AuthController.js line 139: `const refreshToken = req.cookies.refreshToken;`
-            // So backend reads from cookie.
-            // So `authService.refreshToken` should NOT send body?
-            // Or maybe it sends empty body?
-            // Let's check authService.js again.
+            const refreshToken = getCookie('refreshToken');
 
-            const data = await authService.refreshToken(); // Assuming authService handles it
+            const data = await authService.refreshToken();
             const { accessToken } = data;
             setToken(accessToken);
             localStorage.setItem("accessToken", accessToken);
@@ -110,16 +100,6 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    // Deprecated: fetchWithAuth is no longer needed as services use api.js interceptors
-    // But keeping it for backward compatibility if I missed any usage
-    const fetchWithAuth = async (url, options = {}) => {
-        console.warn("fetchWithAuth is deprecated. Use services instead.");
-        // ... implementation ...
-        // Actually, I should remove it if I'm sure.
-        // I checked usages: useProfile (refactored), WatchlistContext (refactored).
-        // So I can remove it.
     };
 
     return (

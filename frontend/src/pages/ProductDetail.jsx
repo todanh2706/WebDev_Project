@@ -20,6 +20,8 @@ const ProductDetail = () => {
     const [showBidModal, setShowBidModal] = useState(false);
     const [bidAmount, setBidAmount] = useState('');
     const [userRatingScore, setUserRatingScore] = useState(null);
+    const [isEligible, setIsEligible] = useState(true);
+    const [permissionStatus, setPermissionStatus] = useState(null);
     const [placingBid, setPlacingBid] = useState(false);
     const { showToast } = useToast();
     const { user } = useAuth();
@@ -41,25 +43,35 @@ const ProductDetail = () => {
             }
         };
 
-        const fetchUserRatings = async () => {
+        const fetchUserEligibility = async () => {
             if (user) {
                 try {
                     const ratings = await userService.getRatings();
-                    if (ratings.length === 0) {
-                        setUserRatingScore(100); // New users are eligible
-                    } else {
+                    const totalRatings = ratings.length;
+
+                    let score = 100;
+                    if (totalRatings > 0) {
                         const goodRatings = ratings.filter(r => r.rating === 'good').length;
-                        const score = (goodRatings / ratings.length) * 100;
-                        setUserRatingScore(score);
+                        score = (goodRatings / totalRatings) * 100;
+                    }
+                    setUserRatingScore(score);
+
+                    // Rule: Eligible if totalRatings >= 5 AND score >= 80
+                    const eligible = totalRatings >= 5 && score >= 80;
+                    setIsEligible(eligible);
+
+                    if (!eligible) {
+                        const permission = await productService.checkBidPermission(id);
+                        setPermissionStatus(permission.status);
                     }
                 } catch (error) {
-                    console.error('Error fetching ratings:', error);
+                    console.error('Error fetching eligibility:', error);
                 }
             }
         };
 
         fetchProduct();
-        fetchUserRatings();
+        fetchUserEligibility();
     }, [id, showToast, user]);
 
     const handlePlaceBidClick = () => {
@@ -69,13 +81,23 @@ const ProductDetail = () => {
             return;
         }
 
-        if (userRatingScore !== null && userRatingScore < 80) {
-            showToast(`You are not eligible to bid. Your rating score is ${userRatingScore.toFixed(1)}% (Min: 80%)`, 'error');
+        if (!isEligible && permissionStatus !== 'approved') {
+            showToast('You are not eligible to bid on this product.', 'error');
             return;
         }
 
         setBidAmount('');
         setShowBidModal(true);
+    };
+
+    const handleRequestPermission = async () => {
+        try {
+            await productService.requestBidPermission(id);
+            setPermissionStatus('pending');
+            showToast('Permission request sent successfully', 'success');
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to send request', 'error');
+        }
     };
 
     const handleBidSubmit = async (e) => {
@@ -154,6 +176,9 @@ const ProductDetail = () => {
                         <ProductInfo
                             product={product}
                             onPlaceBid={handlePlaceBidClick}
+                            isEligible={isEligible}
+                            permissionStatus={permissionStatus}
+                            onRequestPermission={handleRequestPermission}
                         />
 
                         <div className="glass-panel p-4 rounded-4">

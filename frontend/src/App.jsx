@@ -13,6 +13,10 @@ import SearchResults from './pages/SearchResults';
 import AllProducts from './pages/AllProducts';
 import Profile from './pages/Profile';
 
+import ProtectedRoute from './components/common/ProtectedRoute';
+
+// ... existing imports ...
+
 const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-otp';
@@ -30,7 +34,11 @@ const AppContent = () => {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/products" element={<AllProducts />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
       </Routes>
     </>
   )

@@ -4,6 +4,9 @@ const Products = db.Products;
 const Bid = db.Bid;
 const ProductsImage = db.ProductsImage;
 
+const BidPermissionRequest = db.BidPermissionRequest;
+const Feedbacks = db.Feedbacks;
+
 export default {
     getLatestBidded: async (req, res) => {
         try {
@@ -359,12 +362,40 @@ export default {
                 return res.status(400).json({ message: 'Bid amount must be higher than current price' });
             }
 
+            // Check eligibility
+            const ratings = await Feedbacks.findAll({ where: { target_user_id: userId } });
+            const totalRatings = ratings.length;
+            const goodRatings = ratings.filter(r => r.rating === 'good').length;
+            const score = totalRatings > 0 ? (goodRatings / totalRatings) * 100 : 100; // Default 100 for new users? No, prompt says "chưa đủ lượt đánh giá" needs permission.
+
+            // Rule: Must have >= 5 ratings AND >= 80% score.
+            // If not, must have approved permission request.
+            let isEligible = totalRatings >= 5 && score >= 80;
+
+            if (!isEligible) {
+                const permission = await BidPermissionRequest.findOne({
+                    where: {
+                        user_id: userId,
+                        product_id: id,
+                        status: 'approved'
+                    }
+                });
+
+                if (!permission) {
+                    await t.rollback();
+                    return res.status(403).json({
+                        message: 'You are not eligible to bid on this product. Please request permission from the seller.',
+                        requiresPermission: true
+                    });
+                }
+            }
+
             // Create bid
             await Bid.create({
                 bidder_id: userId,
                 product_id: id,
                 amount: amount,
-                max_bid_amount: amount, // Assuming simple bidding for now
+                max_bid_amount: amount,
                 bid_time: new Date()
             }, { transaction: t });
 
@@ -383,4 +414,111 @@ export default {
         }
     },
 
+    requestBidPermission: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+
+            const existingRequest = await BidPermissionRequest.findOne({
+                where: {
+                    user_id: userId,
+                    product_id: id
+                }
+            });
+
+            if (existingRequest) {
+                return res.status(400).json({ message: 'Request already sent', status: existingRequest.status });
+            }
+
+            await BidPermissionRequest.create({
+                user_id: userId,
+                product_id: id,
+                status: 'pending'
+            });
+
+            res.json({ message: 'Permission request sent successfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error sending permission request' });
+        }
+    },
+
+    checkBidPermission: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+
+            const request = await BidPermissionRequest.findOne({
+                where: {
+                    user_id: userId,
+                    product_id: id
+                }
+            });
+
+            res.json({ status: request ? request.status : null });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error checking permission status' });
+        }
+    },
+
+    getSellerBidRequests: async (req, res) => {
+        try {
+            const sellerId = req.user.id;
+
+            const requests = await BidPermissionRequest.findAll({
+                include: [
+                    {
+                        model: Products,
+                        as: 'product',
+                        where: { seller_id: sellerId },
+                        attributes: ['id', 'name']
+                    },
+                    {
+                        model: db.Users,
+                        as: 'user',
+                        attributes: ['id', 'name', 'email'] // Add rating info if needed
+                    }
+                ],
+                order: [['createdAt', 'DESC']]
+            });
+
+            res.json(requests);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching bid requests' });
+        }
+    },
+
+    handleBidRequest: async (req, res) => {
+        try {
+            const { requestId } = req.params;
+            const { status } = req.body; // 'approved' or 'rejected'
+            const sellerId = req.user.id;
+
+            const request = await BidPermissionRequest.findByPk(requestId, {
+                include: [
+                    {
+                        model: Products,
+                        as: 'product'
+                    }
+                ]
+            });
+
+            if (!request) {
+                return res.status(404).json({ message: 'Request not found' });
+            }
+
+            if (request.product.seller_id !== sellerId) {
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+
+            await request.update({ status });
+
+            res.json({ message: `Request ${status} successfully` });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error updating request' });
+        }
+    }
 };

@@ -21,6 +21,10 @@ export default (app) => {
     app.get('/api/products/search', ProductController.search);
     app.get('/api/products/:id', ProductController.getById);
     app.post('/api/products/:id/bid', authenticateToken, ProductController.placeBid);
+    app.post('/api/products/:id/bid-request', authenticateToken, ProductController.requestBidPermission);
+    app.get('/api/products/:id/bid-permission', authenticateToken, ProductController.checkBidPermission);
+    app.get('/api/seller/bid-requests', authenticateToken, ProductController.getSellerBidRequests);
+    app.put('/api/seller/bid-requests/:requestId', authenticateToken, ProductController.handleBidRequest);
     // Category Routes
     app.get('/api/categories', CategoryController.getAll); // Added new route for categories
     app.get('/api/categories/:id', CategoryController.getById);
