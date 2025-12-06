@@ -8,6 +8,7 @@ export default (app) => {
     app.post('/api/register', AuthController.register);
     app.post('/api/login', AuthController.logIn);
     app.post('/api/refresh', AuthController.refreshToken);
+    app.post('/api/logout', AuthController.logout);
     app.post('/api/verify-otp', AuthController.verifyOTP);
 
     // Product Routes

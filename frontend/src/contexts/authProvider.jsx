@@ -33,19 +33,19 @@ export const AuthProvider = ({ children }) => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, password }),
+                credentials: 'include'
             });
 
             const data = await res.json();
 
             if (!res.ok) throw new Error(data.message || "Failed to login!");
 
-            const { user, accessToken, refreshToken } = data;
+            const { user, accessToken } = data;
             setUser(user);
             setToken(accessToken);
 
             localStorage.setItem("user", JSON.stringify(user));
             localStorage.setItem("accessToken", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
             navigate('/home');
         } catch (err) {
             setError(err.message);
@@ -79,17 +79,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     const refreshAccessToken = async () => {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-            logout();
-            return false;
-        }
-
         try {
             const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/refresh`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refreshToken }),
+                credentials: 'include'
             });
 
             const data = await res.json();
@@ -107,12 +101,20 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = () => {
+    const logout = async () => {
+        try {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/logout`, {
+                method: "POST",
+                credentials: 'include'
+            });
+        } catch (error) {
+            console.error("Logout failed", error);
+        }
+
         setUser(null);
         setToken(null);
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
         navigate('/login');
     };
 

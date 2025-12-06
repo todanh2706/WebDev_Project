@@ -13,8 +13,11 @@ app.use(cors({
 
 import db from "./src/models/index.js";
 
+import cookieParser from "cookie-parser";
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 route(app);
 

@@ -116,11 +116,18 @@ export default {
             user.last_login_at = gmt7Time;
             await user.save();
 
+            // Set Refresh Token as HttpOnly Cookie
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                sameSite: 'strict', // Prevent CSRF
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            });
+
             return res.json({
                 message: 'Login successful.',
                 user,
-                accessToken,
-                refreshToken
+                accessToken
             });
         } catch (e) {
             console.log(e);
@@ -129,7 +136,8 @@ export default {
     },
 
     async refreshToken(req, res) {
-        const { refreshToken } = req.body;
+        const refreshToken = req.cookies.refreshToken;
+
         if (!refreshToken) {
             return res.status(401).send({ message: 'Refresh Token is required!' });
         }
@@ -146,6 +154,16 @@ export default {
         } catch (e) {
             console.log(e);
             return res.status(403).send({ message: 'Invalid Refresh Token!' });
+        }
+    },
+
+    async logout(req, res) {
+        try {
+            res.clearCookie('refreshToken');
+            return res.status(200).send({ message: 'Logged out successfully.' });
+        } catch (e) {
+            console.log(e);
+            return res.status(500).send({ message: 'Error logging out.' });
         }
     }
 }
