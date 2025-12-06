@@ -128,6 +128,11 @@ export default {
                     model: Users,
                     as: 'current_winner',
                     attributes: ['name']
+                }, {
+                    model: Feedbacks,
+                    as: 'feedbacks',
+                    where: { reviewer_id: req.user.id },
+                    required: false
                 }]
             });
             res.json(products);

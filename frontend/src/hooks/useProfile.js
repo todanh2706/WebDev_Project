@@ -87,6 +87,31 @@ export const useProfile = () => {
         }
     };
 
+    const submitFeedback = async (productId, rating, comment) => {
+        try {
+            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/feedbacks`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ product_id: productId, rating, comment })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                showToast('Feedback submitted successfully', 'success');
+                // Refresh ratings and won list
+                fetchData();
+                return true;
+            } else {
+                throw new Error(data.message || 'Failed to submit feedback');
+            }
+        } catch (error) {
+            showToast(error.message, 'error');
+            return false;
+        }
+    };
+
     return {
         loading,
         profile,
@@ -96,6 +121,7 @@ export const useProfile = () => {
         ratings,
         updateProfile,
         changePassword,
+        submitFeedback,
         refreshData: fetchData
     };
 };

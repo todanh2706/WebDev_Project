@@ -2,6 +2,7 @@ import AuthController from '../controllers/authControllers.js'
 import ProductController from '../controllers/productController.js'
 import CategoryController from '../controllers/categoryController.js'; // Added import for CategoryController
 import UserController from '../controllers/userController.js';
+import FeedbackController from '../controllers/feedbackController.js';
 import { authenticateToken } from '../middleware/authMiddleware.js';
 
 export default (app) => {
@@ -32,6 +33,9 @@ export default (app) => {
     app.get('/api/user/participating', authenticateToken, UserController.getParticipatingAuctions);
     app.get('/api/user/won', authenticateToken, UserController.getWonAuctions);
     app.get('/api/user/ratings', authenticateToken, UserController.getRatings);
+
+    // Feedback Routes
+    app.post('/api/feedbacks', authenticateToken, FeedbackController.create);
 
     app.get('/', (req, res) => {
         res.send('Backend is running!');

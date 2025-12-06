@@ -3,9 +3,9 @@ import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Button from './Button';
 import { useWatchlist } from '../contexts/WatchlistContext';
-import { FaEye, FaClock, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaEye, FaClock, FaHeart, FaRegHeart, FaStar } from 'react-icons/fa';
 
-const ProductCard = ({ product, onWatchlistChange }) => {
+const ProductCard = ({ product, onWatchlistChange, onRateSeller }) => {
     const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date, id } = product;
     const imageUrl = images && images.length > 0 ? images[0].image_url : 'https://placehold.co/600x400?text=No+Image';
 
@@ -160,10 +160,24 @@ const ProductCard = ({ product, onWatchlistChange }) => {
                     </div>
 
                     <Link to={`/product/${product.id}`} className="text-decoration-none">
-                        <Button className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm">
+                        <Button className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm view-details-btn">
                             <FaEye /> View Details
                         </Button>
                     </Link>
+
+                    {onRateSeller && (
+                        <div className="mt-2">
+                            <Button
+                                className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm bg-success border-success"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    onRateSeller(product);
+                                }}
+                            >
+                                <FaStar /> Rate Seller
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </Card.Body>
         </Card>

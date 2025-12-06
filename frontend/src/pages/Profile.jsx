@@ -6,9 +6,13 @@ import AccountInfo from '../components/profile/AccountInfo';
 import ChangePassword from '../components/profile/ChangePassword';
 import MyRatings from '../components/profile/MyRatings';
 import ProductGrid from '../components/profile/ProductGrid';
+import FeedbackModal from '../components/FeedbackModal';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('account');
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
     const {
         loading,
         profile,
@@ -18,6 +22,7 @@ const Profile = () => {
         ratings,
         updateProfile,
         changePassword,
+        submitFeedback,
         refreshData
     } = useProfile();
 
@@ -88,7 +93,14 @@ const Profile = () => {
                                     </Tab.Pane>
 
                                     <Tab.Pane eventKey="won">
-                                        <ProductGrid products={won} emptyMessage="You haven't won any auctions yet." />
+                                        <ProductGrid
+                                            products={won}
+                                            emptyMessage="You haven't won any auctions yet."
+                                            onRateSeller={(product) => {
+                                                setSelectedProduct(product);
+                                                setShowFeedbackModal(true);
+                                            }}
+                                        />
                                     </Tab.Pane>
                                 </Tab.Content>
                             </Col>
@@ -96,6 +108,25 @@ const Profile = () => {
                     </Tab.Container>
                 </div>
             </Container>
+
+            <FeedbackModal
+                isOpen={showFeedbackModal}
+                onClose={() => {
+                    setShowFeedbackModal(false);
+                    setSelectedProduct(null);
+                }}
+                onSubmit={async (data) => {
+                    if (selectedProduct) {
+                        const success = await submitFeedback(selectedProduct.id, data.rating, data.comment);
+                        if (success) {
+                            setShowFeedbackModal(false);
+                            setSelectedProduct(null);
+                        }
+                    }
+                }}
+                existingFeedback={selectedProduct?.feedbacks?.[0]}
+                productName={selectedProduct?.name}
+            />
         </div>
     );
 };
