@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import TopNavBar from '../components/TopNavBar';
+import TopNavBar from '../components/layout/TopNavBar';
 import { Container, Row, Col } from 'react-bootstrap';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
 import { Link } from 'react-router-dom';
-import ProductCarousel from '../components/ProductCarousel';
+import ProductCarousel from '../components/products/ProductCarousel';
+import { productService } from '../services/productService';
 
 export default function Home() {
     const [latestBidded, setLatestBidded] = useState([]);
@@ -14,15 +15,11 @@ export default function Home() {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const [latestRes, mostRes, highestRes] = await Promise.all([
-                    fetch(`${import.meta.env.VITE_API_BASE_URL}/products/latest-bidded`),
-                    fetch(`${import.meta.env.VITE_API_BASE_URL}/products/most-bidded`),
-                    fetch(`${import.meta.env.VITE_API_BASE_URL}/products/highest-price`)
+                const [latestData, mostData, highestData] = await Promise.all([
+                    productService.getLatestBiddedProducts(),
+                    productService.getMostBiddedProducts(),
+                    productService.getHighestPriceProducts()
                 ]);
-
-                const latestData = await latestRes.json();
-                const mostData = await mostRes.json();
-                const highestData = await highestRes.json();
 
                 setLatestBidded(latestData);
                 setMostBidded(mostData);

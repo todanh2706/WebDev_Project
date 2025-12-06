@@ -1,9 +1,10 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import Button from './Button';
-import { useWatchlist } from '../contexts/WatchlistContext';
+import Button from '../common/Button';
+import { useWatchlist } from '../../contexts/WatchlistContext';
 import { FaEye, FaClock, FaHeart, FaRegHeart, FaStar } from 'react-icons/fa';
+import { formatTimeLeft, maskName, formatDate, isNew } from '../../utils/formatters';
 
 const ProductCard = ({ product, onWatchlistChange, onRateSeller }) => {
     const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date, id } = product;
@@ -27,36 +28,6 @@ const ProductCard = ({ product, onWatchlistChange, onRateSeller }) => {
         }
     };
 
-    const formatTimeLeft = (endTime) => {
-        const total = Date.parse(endTime) - Date.parse(new Date());
-        if (total <= 0) return 'Expired';
-        const days = Math.floor(total / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-        if (days > 0) return `${days}d ${hours}h left`;
-        return `${hours}h left`;
-    };
-
-    const maskName = (name) => {
-        if (!name) return 'No Bids';
-        if (name.length <= 4) return '****';
-        return `****${name.slice(-4)}`;
-    };
-
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    };
-
-    const isNew = (dateString) => {
-        const postDate = new Date(dateString);
-        const now = new Date();
-        const diffTime = Math.abs(now - postDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays <= 2;
-    };
 
     return (
         <Card className={`h-100 border-0 glass-panel-dark text-white overflow-hidden shadow-sm hover-scale ${isNew(post_date) ? 'card-new' : ''}`}>

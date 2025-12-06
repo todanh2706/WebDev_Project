@@ -6,7 +6,7 @@ import AccountInfo from '../components/profile/AccountInfo';
 import ChangePassword from '../components/profile/ChangePassword';
 import MyRatings from '../components/profile/MyRatings';
 import ProductGrid from '../components/profile/ProductGrid';
-import FeedbackModal from '../components/FeedbackModal';
+import FeedbackModal from '../components/feedback/FeedbackModal';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('account');

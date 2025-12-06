@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form } from 'react-bootstrap';
 import { X, ThumbsUp, ThumbsDown } from 'lucide-react';
-import Button from './Button';
+import Button from '../common/Button';
 
 const FeedbackModal = ({ isOpen, onClose, onSubmit, productName, existingFeedback }) => {
     const [rating, setRating] = useState('good');

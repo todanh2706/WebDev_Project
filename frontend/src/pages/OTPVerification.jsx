@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Form } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../contexts/ToastContext';
 import { FaLock } from 'react-icons/fa';

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Spinner, Form } from 'react-bootstrap';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/products/ProductCard';
 import { useToast } from '../contexts/ToastContext';
-import Pagination from '../components/Pagination';
+import Pagination from '../components/common/Pagination';
+import { productService } from '../services/productService';
 
 const AllProducts = () => {
     const [products, setProducts] = useState([]);
@@ -16,17 +17,9 @@ const AllProducts = () => {
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products?page=${currentPage}&limit=12&sort=${sortBy}`);
-                if (!response.ok) throw new Error('Failed to fetch products');
-                const data = await response.json();
-
-                if (Array.isArray(data)) {
-                    setProducts(data);
-                    setTotalPages(1);
-                } else {
-                    setProducts(data.products);
-                    setTotalPages(data.totalPages);
-                }
+                const data = await productService.getAllProducts(currentPage, 12);
+                setProducts(data.products);
+                setTotalPages(data.totalPages);
             } catch (error) {
                 console.error('Error fetching products:', error);
                 showToast('Failed to load products', 'error');
@@ -36,7 +29,7 @@ const AllProducts = () => {
         };
 
         fetchProducts();
-    }, [currentPage, sortBy, showToast]);
+    }, [currentPage, showToast]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);

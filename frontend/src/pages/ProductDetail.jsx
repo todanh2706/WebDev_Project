@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Image, Badge, Spinner } from 'react-bootstrap';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
+import { productService } from '../services/productService';
 import { useToast } from '../contexts/ToastContext';
 import { FaClock, FaGavel, FaUser, FaTag, FaShieldAlt, FaArrowLeft } from 'react-icons/fa';
 import { useAuth } from '../hooks/useAuth';
@@ -19,9 +20,7 @@ const ProductDetail = () => {
         const fetchProduct = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/${id}`);
-                if (!response.ok) throw new Error('Failed to fetch product');
-                const data = await response.json();
+                const data = await productService.getProductById(id);
                 setProduct(data);
                 if (data.images && data.images.length > 0) {
                     setSelectedImage(data.images[0].image_url);
@@ -34,9 +33,7 @@ const ProductDetail = () => {
             }
         };
 
-        if (id) {
-            fetchProduct();
-        }
+        fetchProduct();
     }, [id, showToast]);
 
     const formatTimeLeft = (endTime) => {

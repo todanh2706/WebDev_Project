@@ -8,7 +8,7 @@ import CategoryProducts from './pages/CategoryProducts';
 import ProductDetail from './pages/ProductDetail';
 import { ToastProvider } from './contexts/ToastContext';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
-import TopNavBar from './components/TopNavBar';
+import TopNavBar from './components/layout/TopNavBar';
 import SearchResults from './pages/SearchResults';
 import AllProducts from './pages/AllProducts';
 import Profile from './pages/Profile';

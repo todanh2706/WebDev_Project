@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../contexts/ToastContext";
 import { FaEye, FaEyeSlash, FaGavel } from "react-icons/fa";
-import Button from "../components/Button";
+import Button from '../components/common/Button';
 
 
 export default function LogIn() {

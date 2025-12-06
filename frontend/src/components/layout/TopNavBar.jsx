@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar, Nav, Container, NavDropdown, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import Button from './Button';
+import { useAuth } from '../../hooks/useAuth';
+import Button from '../common/Button';
+import { productService } from '../../services/productService';
 import {
     FaUserCircle, FaGavel, FaSignOutAlt, FaUser, FaChevronRight,
     FaMobileAlt, FaLaptop, FaHeadphones, FaCamera, FaHome, FaGamepad, FaTshirt, FaSearch
@@ -18,13 +19,10 @@ const TopNavBar = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setCategories(data);
-                    if (data.length > 0) {
-                        setActiveCategory(data[0].id);
-                    }
+                const data = await productService.getCategories();
+                setCategories(data);
+                if (data.length > 0) {
+                    setActiveCategory(data[0].id);
                 }
             } catch (error) {
                 console.error("Error fetching categories:", error);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Container, Row, Col, Spinner, Form } from 'react-bootstrap';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/products/ProductCard';
 import { useToast } from '../contexts/ToastContext';
-
-import Pagination from '../components/Pagination';
+import Pagination from '../components/common/Pagination';
+import { productService } from '../services/productService';
 
 const CategoryProducts = () => {
     const { id } = useParams();
@@ -20,29 +20,13 @@ const CategoryProducts = () => {
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                // Fetch products by category with pagination and sorting
-                const productsResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/products/category/${id}?page=${currentPage}&limit=12&sort=${sortBy}`);
-                if (!productsResponse.ok) throw new Error('Failed to fetch products');
-                const data = await productsResponse.json();
-
-                // Handle both old array format (fallback) and new paginated format
-                if (Array.isArray(data)) {
-                    setProducts(data);
-                    setTotalPages(1);
-                } else {
-                    setProducts(data.products);
-                    setTotalPages(data.totalPages);
-                }
-
-                // Fetch category details
-                const categoryResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories/${id}`);
-                if (categoryResponse.ok) {
-                    const categoryData = await categoryResponse.json();
-                    setCategoryName(categoryData.name);
-                }
+                const data = await productService.getProductsByCategory(id, currentPage, 12, sortBy);
+                setProducts(data.products);
+                setTotalPages(data.totalPages);
+                if (data.categoryName) setCategoryName(data.categoryName);
             } catch (error) {
-                console.error('Error fetching data:', error);
-                showToast('Failed to load data', 'error');
+                console.error('Error fetching category products:', error);
+                showToast('Failed to load products', 'error');
             } finally {
                 setLoading(false);
             }

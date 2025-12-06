@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
-import { useAuth } from './useAuth';
+import { userService } from '../services/userService';
+import { authService } from '../services/authService';
 
 export const useProfile = () => {
     const [loading, setLoading] = useState(true);
@@ -10,24 +11,23 @@ export const useProfile = () => {
     const [won, setWon] = useState([]);
     const [ratings, setRatings] = useState([]);
     const { showToast } = useToast();
-    const { fetchWithAuth } = useAuth();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [profileRes, watchlistRes, participatingRes, wonRes, ratingsRes] = await Promise.all([
-                fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/profile`),
-                fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/watchlist`),
-                fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/participating`),
-                fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/won`),
-                fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/ratings`)
+            const [profileData, watchlistData, participatingData, wonData, ratingsData] = await Promise.all([
+                authService.getProfile(),
+                userService.getWatchlist(),
+                userService.getParticipating(),
+                userService.getWonAuctions(),
+                userService.getRatings()
             ]);
 
-            if (profileRes.ok) setProfile(await profileRes.json());
-            if (watchlistRes.ok) setWatchlist(await watchlistRes.json());
-            if (participatingRes.ok) setParticipating(await participatingRes.json());
-            if (wonRes.ok) setWon(await wonRes.json());
-            if (ratingsRes.ok) setRatings(await ratingsRes.json());
+            setProfile(profileData);
+            setWatchlist(watchlistData);
+            setParticipating(participatingData);
+            setWon(wonData);
+            setRatings(ratingsData);
 
         } catch (error) {
             console.error('Error fetching profile data:', error);
@@ -35,7 +35,7 @@ export const useProfile = () => {
         } finally {
             setLoading(false);
         }
-    }, [showToast, fetchWithAuth]);
+    }, [showToast]);
 
     useEffect(() => {
         fetchData();
@@ -43,71 +43,36 @@ export const useProfile = () => {
 
     const updateProfile = async (name, email) => {
         try {
-            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, email })
-            });
-
-            if (response.ok) {
-                setProfile(prev => ({ ...prev, name, email }));
-                showToast('Profile updated successfully', 'success');
-                return true;
-            } else {
-                throw new Error('Failed to update profile');
-            }
+            await userService.updateProfile({ name, email });
+            setProfile(prev => ({ ...prev, name, email }));
+            showToast('Profile updated successfully', 'success');
+            return true;
         } catch (error) {
-            showToast(error.message, 'error');
+            showToast(error.message || 'Failed to update profile', 'error');
             return false;
         }
     };
 
     const changePassword = async (oldPassword, newPassword) => {
         try {
-            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ oldPassword, newPassword })
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                showToast('Password changed successfully', 'success');
-                return true;
-            } else {
-                throw new Error(data.message || 'Failed to change password');
-            }
+            await userService.changePassword({ oldPassword, newPassword });
+            showToast('Password changed successfully', 'success');
+            return true;
         } catch (error) {
-            showToast(error.message, 'error');
+            showToast(error.message || 'Failed to change password', 'error');
             return false;
         }
     };
 
     const submitFeedback = async (productId, rating, comment) => {
         try {
-            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/feedbacks`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ product_id: productId, rating, comment })
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                showToast('Feedback submitted successfully', 'success');
-                // Refresh ratings and won list
-                fetchData();
-                return true;
-            } else {
-                throw new Error(data.message || 'Failed to submit feedback');
-            }
+            await userService.submitFeedback({ product_id: productId, rating, comment });
+            showToast('Feedback submitted successfully', 'success');
+            // Refresh ratings and won list
+            fetchData();
+            return true;
         } catch (error) {
-            showToast(error.message, 'error');
+            showToast(error.message || 'Failed to submit feedback', 'error');
             return false;
         }
     };

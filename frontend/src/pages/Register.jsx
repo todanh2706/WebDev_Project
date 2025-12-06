@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../contexts/ToastContext";
 import { FaEye, FaEyeSlash, FaGavel, FaUser, FaPhone, FaEnvelope } from "react-icons/fa";
-import Button from "../components/Button";
+import Button from '../components/common/Button';
 
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";

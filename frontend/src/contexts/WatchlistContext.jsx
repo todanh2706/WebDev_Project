@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from './ToastContext';
+import { userService } from '../services/userService';
 
 const WatchlistContext = createContext();
 
@@ -15,7 +16,7 @@ export const useWatchlist = () => {
 export const WatchlistProvider = ({ children }) => {
     const [watchlist, setWatchlist] = useState(new Set());
     const [loading, setLoading] = useState(false);
-    const { user, fetchWithAuth } = useAuth();
+    const { user } = useAuth();
     const { showToast } = useToast();
 
     const fetchWatchlist = useCallback(async () => {
@@ -25,17 +26,14 @@ export const WatchlistProvider = ({ children }) => {
         }
 
         try {
-            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/watchlist`);
-            if (response.ok) {
-                const data = await response.json();
-                // Assuming data is an array of products, we extract IDs
-                const ids = new Set(data.map(item => item.id));
-                setWatchlist(ids);
-            }
+            const data = await userService.getWatchlist();
+            // Assuming data is an array of products, we extract IDs
+            const ids = new Set(data.map(item => item.id));
+            setWatchlist(ids);
         } catch (error) {
             console.error('Error fetching watchlist:', error);
         }
-    }, [user, fetchWithAuth]);
+    }, [user]);
 
     useEffect(() => {
         fetchWatchlist();
@@ -48,26 +46,13 @@ export const WatchlistProvider = ({ children }) => {
         }
 
         try {
-            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/watchlist`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ productId })
-            });
-
-            if (response.ok) {
-                setWatchlist(prev => new Set(prev).add(productId));
-                showToast('Added to watchlist', 'success');
-                return true;
-            } else {
-                const data = await response.json();
-                showToast(data.message || 'Failed to add to watchlist', 'error');
-                return false;
-            }
+            await userService.addToWatchlist(productId);
+            setWatchlist(prev => new Set(prev).add(productId));
+            showToast('Added to watchlist', 'success');
+            return true;
         } catch (error) {
             console.error('Error adding to watchlist:', error);
-            showToast('Error adding to watchlist', 'error');
+            showToast(error.response?.data?.message || 'Error adding to watchlist', 'error');
             return false;
         }
     };
@@ -76,25 +61,17 @@ export const WatchlistProvider = ({ children }) => {
         if (!user) return false;
 
         try {
-            const response = await fetchWithAuth(`${import.meta.env.VITE_API_BASE_URL}/user/watchlist/${productId}`, {
-                method: 'DELETE'
+            await userService.removeFromWatchlist(productId);
+            setWatchlist(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(productId);
+                return newSet;
             });
-
-            if (response.ok) {
-                setWatchlist(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(productId);
-                    return newSet;
-                });
-                showToast('Removed from watchlist', 'info');
-                return true;
-            } else {
-                showToast('Failed to remove from watchlist', 'error');
-                return false;
-            }
+            showToast('Removed from watchlist', 'info');
+            return true;
         } catch (error) {
             console.error('Error removing from watchlist:', error);
-            showToast('Error removing from watchlist', 'error');
+            showToast(error.response?.data?.message || 'Error removing from watchlist', 'error');
             return false;
         }
     };

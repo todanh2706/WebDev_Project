@@ -1,5 +1,5 @@
 import { Row, Col } from 'react-bootstrap';
-import ProductCard from '../../components/ProductCard';
+import ProductCard from '../products/ProductCard';
 
 const ProductGrid = ({ products, emptyMessage, onWatchlistChange, onRateSeller }) => {
     return (
