@@ -11,15 +11,14 @@ export const up = async (queryInterface, Sequelize) => {
             return;
         }
 
-        const hashedPassword = await bcrypt.hash('password123', 10);
 
         await Users.create({
             id: 1, // Force ID 1
             name: 'Admin User',
-            email: 'admin@example.com',
-            password: hashedPassword,
+            email: 'todanh2706@gmail.com',
+            password: '123123',
             phone: '1234567890',
-            address: '123 Admin St',
+            address: 'Admin secret',
             role: 2, // 2: admin
             status: 'active',
             is_verified: true
