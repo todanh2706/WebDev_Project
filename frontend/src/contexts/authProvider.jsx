@@ -6,7 +6,7 @@ import { authService } from "../services/authService";
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -23,6 +23,8 @@ export const AuthProvider = ({ children }) => {
             console.error("Failed to load auth state from localStorage", err);
             localStorage.removeItem("accessToken");
             localStorage.removeItem("user");
+        } finally {
+            setIsLoading(false);
         }
     }, []);
 

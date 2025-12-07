@@ -3,7 +3,8 @@ import ProductController from '../controllers/productController.js'
 import CategoryController from '../controllers/categoryController.js'; // Added import for CategoryController
 import UserController from '../controllers/userController.js';
 import FeedbackController from '../controllers/feedbackController.js';
-import { authenticateToken } from '../middleware/authMiddleware.js';
+import { authenticateToken, isAdmin } from '../middleware/authMiddleware.js';
+import AdminController from '../controllers/adminController.js';
 
 export default (app) => {
     app.post('/api/register', AuthController.register);
@@ -26,7 +27,7 @@ export default (app) => {
     app.get('/api/seller/bid-requests', authenticateToken, ProductController.getSellerBidRequests);
     app.put('/api/seller/bid-requests/:requestId', authenticateToken, ProductController.handleBidRequest);
     // Category Routes
-    app.get('/api/categories', CategoryController.getAll); // Added new route for categories
+    app.get('/api/categories', CategoryController.getAll);
     app.get('/api/categories/:id', CategoryController.getById);
 
     // User Routes
@@ -41,6 +42,14 @@ export default (app) => {
 
     // Feedback Routes
     app.post('/api/feedbacks', authenticateToken, FeedbackController.create);
+
+    // Admin Routes
+    app.get('/api/admin/users', authenticateToken, isAdmin, AdminController.getUsers);
+    app.delete('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.deleteUser);
+    app.get('/api/admin/upgrade-requests', authenticateToken, isAdmin, AdminController.getUpgradeRequests);
+    app.post('/api/admin/upgrade-requests/:requestId/approve', authenticateToken, isAdmin, AdminController.approveUpgradeRequest);
+    app.post('/api/admin/upgrade-requests/:requestId/reject', authenticateToken, isAdmin, AdminController.rejectUpgradeRequest);
+    app.delete('/api/admin/products/:id', authenticateToken, isAdmin, AdminController.deleteProduct);
 
     app.get('/', (req, res) => {
         res.send('Backend is running!');

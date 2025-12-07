@@ -12,18 +12,21 @@ import TopNavBar from './components/layout/TopNavBar';
 import SearchResults from './pages/SearchResults';
 import AllProducts from './pages/AllProducts';
 import Profile from './pages/Profile';
+import AdminLayout from './components/layout/AdminLayout';
+import AdminProducts from './pages/admin/AdminProducts';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminUpgradeRequests from './pages/admin/AdminUpgradeRequests';
 
 import ProtectedRoute from './components/common/ProtectedRoute';
-
-// ... existing imports ...
 
 const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-otp';
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   return (
     <>
-      {!isAuthPage && <TopNavBar />}
+      {!isAuthPage && !isAdminPage && <TopNavBar />}
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
@@ -39,6 +42,15 @@ const AppContent = () => {
             <Profile />
           </ProtectedRoute>
         } />
+        <Route path="/admin" element={
+          <ProtectedRoute requireAdmin>
+            <AdminLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="edit/products" element={<AdminProducts />} />
+          <Route path="edit/users" element={<AdminUsers />} />
+          <Route path="manage/upgraderequests" element={<AdminUpgradeRequests />} />
+        </Route>
       </Routes>
     </>
   )

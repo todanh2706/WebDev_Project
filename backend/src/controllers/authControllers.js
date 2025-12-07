@@ -99,13 +99,13 @@ export default {
 
             // Generate Tokens
             const accessToken = jwt.sign(
-                { id: user.id, email: user.email },
+                { id: user.id, email: user.email, role: user.role },
                 process.env.JWT_SECRET || 'access_secret',
                 { expiresIn: '15m' }
             );
 
             const refreshToken = jwt.sign(
-                { id: user.id, email: user.email },
+                { id: user.id, email: user.email, role: user.role },
                 process.env.JWT_SECRET || 'refresh_secret',
                 { expiresIn: '7d' }
             );
@@ -145,7 +145,7 @@ export default {
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET || 'refresh_secret');
             const accessToken = jwt.sign(
-                { id: decoded.id, email: decoded.email },
+                { id: decoded.id, email: decoded.email, role: decoded.role },
                 process.env.JWT_SECRET || 'access_secret',
                 { expiresIn: '15m' }
             );

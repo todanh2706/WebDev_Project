@@ -17,3 +17,18 @@ export const authenticateToken = (req, res, next) => {
         res.status(401).json({ error: 'Invalid token!' });
     }
 };
+
+export const isAdmin = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check for 'ADMIN' string or role ID 2
+    const isAdminRole = req.user.role === 2;
+
+    if (!isAdminRole) {
+        return res.status(403).json({ error: 'Access denied! Admin only.' });
+    }
+
+    next();
+};
