@@ -95,6 +95,14 @@ export default {
                 return res.status(400).json({ message: 'Request already processed' });
             }
 
+            // Check if expired (7 days)
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+            if (new Date(request.createdAt) < sevenDaysAgo) {
+                await t.rollback();
+                return res.status(400).json({ message: 'Request has expired (older than 7 days)' });
+            }
+
             // Update request status
             request.status = 'approved';
             await request.save({ transaction: t });

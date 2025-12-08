@@ -26,6 +26,8 @@ const BidModal = ({ show, onHide, product, onSubmit, bidAmount, setBidAmount, pl
                 <Form onSubmit={onSubmit}>
                     <div className="mb-4">
                         <p className="text-white-50 mb-2">Current Price: <span className="text-auction-primary fw-bold">${parseFloat(product.current_price).toLocaleString()}</span></p>
+                        <p className="text-white-50 mb-2">Step Price: <span className="text-light fw-bold">+${parseFloat(product.step_price).toLocaleString()}</span></p>
+                        <p className="text-white-50 mb-2">Minimum Bid: <span className="text-success fw-bold">${(parseFloat(product.current_price) + parseFloat(product.step_price)).toLocaleString()}</span></p>
                         <Form.Group>
                             <Form.Label className="text-auction-primary">Your Bid Amount ($)</Form.Label>
                             <Form.Control

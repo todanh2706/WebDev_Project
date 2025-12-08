@@ -22,7 +22,15 @@ export default {
             });
 
             if (existingRequest) {
-                return res.status(400).json({ message: 'You already have a pending upgrade request' });
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                if (new Date(existingRequest.createdAt) < sevenDaysAgo) {
+                    existingRequest.status = 'expired';
+                    await existingRequest.save();
+                } else {
+                    return res.status(400).json({ message: 'You already have a pending upgrade request' });
+                }
             }
 
             const request = await UpgradeRequests.create({
@@ -45,7 +53,15 @@ export default {
                 order: [['createdAt', 'DESC']]
             });
 
-            // If no request found, return null instead of 404 to handle UI gracefully
+            if (request && request.status === 'pending') {
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                if (new Date(request.createdAt) < sevenDaysAgo) {
+                    request.status = 'expired';
+                    await request.save();
+                }
+            }
             res.json(request || null);
         } catch (error) {
             console.error(error);

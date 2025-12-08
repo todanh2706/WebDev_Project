@@ -41,9 +41,9 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
                         </span>
                     </div>
                     <div className="col-6 border-start border-white border-opacity-10 ps-4">
-                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Total Bids</small>
-                        <span className="h2 text-white fw-bold mb-0">
-                            {product.bid_count || 0}
+                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Step Price</small>
+                        <span className="h4 text-white fw-bold mb-0">
+                            +${parseFloat(product.step_price).toLocaleString()}
                         </span>
                     </div>
                 </div>

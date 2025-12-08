@@ -415,16 +415,17 @@ export default {
                 return res.status(400).json({ message: 'Auction has ended' });
             }
 
-            if (parseFloat(amount) <= parseFloat(product.current_price)) {
+            const minBidAmount = parseFloat(product.current_price) + parseFloat(product.step_price);
+            if (parseFloat(amount) < minBidAmount) {
                 await t.rollback();
-                return res.status(400).json({ message: 'Bid amount must be higher than current price' });
+                return res.status(400).json({ message: `Bid amount must be at least $${minBidAmount.toLocaleString()} (Current Price + Step Price)` });
             }
 
             // Check eligibility
             const ratings = await Feedbacks.findAll({ where: { target_user_id: userId } });
             const totalRatings = ratings.length;
             const goodRatings = ratings.filter(r => r.rating === 'good').length;
-            const score = totalRatings > 0 ? (goodRatings / totalRatings) * 100 : 100; // Default 100 for new users? No, prompt says "chưa đủ lượt đánh giá" needs permission.
+            const score = totalRatings > 0 ? (goodRatings / totalRatings) * 100 : 100;
 
             // Rule: Must have >= 5 ratings AND >= 80% score.
             // If not, must have approved permission request.
@@ -444,6 +445,18 @@ export default {
                     return res.status(403).json({
                         message: 'You are not eligible to bid on this product. Please request permission from the seller.',
                         requiresPermission: true
+                    });
+                }
+
+                // Check expiration (7 days)
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                if (new Date(permission.createdAt) < sevenDaysAgo) {
+                    await t.rollback();
+                    return res.status(403).json({
+                        message: 'Your bid permission has expired (7 days limit). Please request permission again.',
+                        requiresPermission: true,
+                        status: 'expired'
                     });
                 }
             }
@@ -512,6 +525,16 @@ export default {
                     product_id: id
                 }
             });
+
+            if (request) {
+                // Check expiration (7 days)
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+                if (new Date(request.createdAt) < sevenDaysAgo) {
+                    return res.json({ status: 'expired' });
+                }
+            }
 
             res.json({ status: request ? request.status : null });
         } catch (error) {
