@@ -179,6 +179,7 @@ const ProductDetail = () => {
                             isEligible={isEligible}
                             permissionStatus={permissionStatus}
                             onRequestPermission={handleRequestPermission}
+                            isOwner={user && user.id === product.seller_id}
                         />
 
                         <div className="glass-panel p-4 rounded-4">

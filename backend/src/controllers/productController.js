@@ -523,13 +523,19 @@ export default {
     getSellerBidRequests: async (req, res) => {
         try {
             const sellerId = req.user.id;
+            const { productId } = req.query;
+
+            const whereClause = { seller_id: sellerId };
+            if (productId) {
+                whereClause.id = productId;
+            }
 
             const requests = await BidPermissionRequest.findAll({
                 include: [
                     {
                         model: Products,
                         as: 'product',
-                        where: { seller_id: sellerId },
+                        where: whereClause,
                         attributes: ['id', 'name']
                     },
                     {

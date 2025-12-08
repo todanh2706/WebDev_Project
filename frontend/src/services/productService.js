@@ -46,13 +46,27 @@ export const productService = {
         return response.data;
     },
 
-    requestBidPermission: async (id) => {
-        const response = await api.post(`/products/${id}/bid-request`);
+    requestBidPermission: async (productId) => {
+        const response = await api.post(`/products/${productId}/bid-request`);
         return response.data;
     },
 
-    checkBidPermission: async (id) => {
-        const response = await api.get(`/products/${id}/bid-permission`);
+    checkBidPermission: async (productId) => {
+        const response = await api.get(`/products/${productId}/bid-permission`);
+        return response.data;
+    },
+
+    getBidRequests: async (productId = null) => {
+        let url = '/seller/bid-requests';
+        if (productId) {
+            url += `?productId=${productId}`;
+        }
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    handleBidRequest: async (requestId, status) => {
+        const response = await api.put(`/seller/bid-requests/${requestId}`, { status });
         return response.data;
     },
     getMyProducts: async (page = 1, limit = 12) => {

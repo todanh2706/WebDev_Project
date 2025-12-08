@@ -3,7 +3,7 @@ import { Badge } from 'react-bootstrap';
 import Button from '../common/Button';
 import { FaTag, FaUser, FaShieldAlt, FaGavel } from 'react-icons/fa';
 
-const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequestPermission }) => {
+const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequestPermission, isOwner }) => {
     if (!product) return null;
 
     return (
@@ -50,7 +50,17 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
             </div>
 
             <div className="d-grid gap-3">
-                {isEligible || permissionStatus === 'approved' ? (
+                {isOwner ? (
+                    <div className="p-3 rounded-4 bg-warning bg-opacity-10 border border-warning text-center">
+                        <FaShieldAlt className="text-warning mb-2 fs-4" />
+                        <h5 className="text-white fw-bold">You are the seller</h5>
+                        <p className="text-white-50 mb-0 small">
+                            You cannot place bids on your own product.
+                            <br />
+                            Manage this product from "My Products".
+                        </p>
+                    </div>
+                ) : isEligible || permissionStatus === 'approved' ? (
                     <Button
                         className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
                         onClick={onPlaceBid}
@@ -66,10 +76,10 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
                     </Button>
                 ) : permissionStatus === 'rejected' ? (
                     <Button
-                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 bg-danger text-white border-danger"
+                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2 bg-secondary text-white border-secondary bg-opacity-50"
                         disabled
                     >
-                        <FaShieldAlt /> Request Rejected
+                        <FaShieldAlt /> You were rejected to bid
                     </Button>
                 ) : (
                     <Button
