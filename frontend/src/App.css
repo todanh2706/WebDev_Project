@@ -690,3 +690,19 @@ select.text-auction-primary option {
 .placeholder-yellow:focus::placeholder {
     opacity: 0.5;
 }
+
+/* Custom placeholder color for upgrade request textarea */
+.upgrade-request-textarea {
+    resize: none;
+}
+
+.upgrade-request-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+    opacity: 1;
+    /* Firefox */
+}
+
+.upgrade-request-textarea::-ms-input-placeholder {
+    /* Edge 12-18 */
+    color: rgba(255, 255, 255, 0.7) !important;
+}

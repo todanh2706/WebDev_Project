@@ -1,9 +1,58 @@
 import db from '../models/index.js';
 import bcrypt from 'bcrypt';
 
-const { Users, Products, Bid, Watchlist, Feedbacks, ProductsImage } = db;
+const { Users, Products, Bid, Watchlist, Feedbacks, ProductsImage, UpgradeRequests } = db;
 
 export default {
+    requestUpgrade: async (req, res) => {
+        try {
+            const { reason } = req.body;
+            const userId = req.user.id;
+
+            if (!reason) {
+                return res.status(400).json({ message: 'Reason is required' });
+            }
+
+            // Check for existing pending request
+            const existingRequest = await UpgradeRequests.findOne({
+                where: {
+                    user_id: userId,
+                    status: 'pending'
+                }
+            });
+
+            if (existingRequest) {
+                return res.status(400).json({ message: 'You already have a pending upgrade request' });
+            }
+
+            const request = await UpgradeRequests.create({
+                user_id: userId,
+                reason,
+                status: 'pending'
+            });
+
+            res.status(201).json({ message: 'Upgrade request submitted successfully', request });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error submitting upgrade request' });
+        }
+    },
+
+    getUpgradeRequest: async (req, res) => {
+        try {
+            const request = await UpgradeRequests.findOne({
+                where: { user_id: req.user.id },
+                order: [['createdAt', 'DESC']]
+            });
+
+            // If no request found, return null instead of 404 to handle UI gracefully
+            res.json(request || null);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching upgrade request' });
+        }
+    },
+
     getProfile: async (req, res) => {
         try {
             const user = await Users.findByPk(req.user.id);

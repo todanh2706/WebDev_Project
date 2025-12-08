@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Container, Row, Col, Tab, Nav, Spinner } from 'react-bootstrap';
-import { FaUser, FaStar, FaHeart, FaGavel, FaTrophy } from 'react-icons/fa';
+import { FaUser, FaStar, FaHeart, FaGavel, FaTrophy, FaArrowUp } from 'react-icons/fa';
 import { useProfile } from '../hooks/useProfile';
 import AccountInfo from '../components/profile/AccountInfo';
 import ChangePassword from '../components/profile/ChangePassword';
 import MyRatings from '../components/profile/MyRatings';
 import ProductGrid from '../components/profile/ProductGrid';
 import FeedbackModal from '../components/feedback/FeedbackModal';
+import UpgradeRequestTab from '../components/profile/UpgradeRequestTab';
 
 const Profile = () => {
     const [activeTab, setActiveTab] = useState('account');
@@ -20,9 +21,11 @@ const Profile = () => {
         participating,
         won,
         ratings,
+        upgradeRequest,
         updateProfile,
         changePassword,
         submitFeedback,
+        submitUpgradeRequest,
         refreshData
     } = useProfile();
 
@@ -71,6 +74,11 @@ const Profile = () => {
                                             <FaTrophy /> Won Auctions
                                         </Nav.Link>
                                     </Nav.Item>
+                                    <Nav.Item>
+                                        <Nav.Link eventKey="upgrade-requests" className="text-white d-flex align-items-center gap-2">
+                                            <FaArrowUp /> Upgrade Requests
+                                        </Nav.Link>
+                                    </Nav.Item>
                                 </Nav>
                             </Col>
                             <Col md={9}>
@@ -100,6 +108,13 @@ const Profile = () => {
                                                 setSelectedProduct(product);
                                                 setShowFeedbackModal(true);
                                             }}
+                                        />
+                                    </Tab.Pane>
+
+                                    <Tab.Pane eventKey="upgrade-requests">
+                                        <UpgradeRequestTab
+                                            upgradeRequest={upgradeRequest}
+                                            submitUpgradeRequest={submitUpgradeRequest}
                                         />
                                     </Tab.Pane>
                                 </Tab.Content>

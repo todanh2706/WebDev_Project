@@ -39,6 +39,8 @@ export default (app) => {
     app.get('/api/user/participating', authenticateToken, UserController.getParticipatingAuctions);
     app.get('/api/user/won', authenticateToken, UserController.getWonAuctions);
     app.get('/api/user/ratings', authenticateToken, UserController.getRatings);
+    app.post('/api/user/upgrade-request', authenticateToken, UserController.requestUpgrade);
+    app.get('/api/user/upgrade-request', authenticateToken, UserController.getUpgradeRequest);
 
     // Feedback Routes
     app.post('/api/feedbacks', authenticateToken, FeedbackController.create);

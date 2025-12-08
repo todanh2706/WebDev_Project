@@ -44,5 +44,15 @@ export const userService = {
     changePassword: async (passwordData) => {
         const response = await api.put('/user/profile', passwordData);
         return response.data;
+    },
+
+    requestUpgrade: async (reason) => {
+        const response = await api.post('/user/upgrade-request', { reason });
+        return response.data;
+    },
+
+    getUpgradeRequest: async () => {
+        const response = await api.get('/user/upgrade-request');
+        return response.data;
     }
 };

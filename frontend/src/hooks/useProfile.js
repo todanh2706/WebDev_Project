@@ -10,17 +10,19 @@ export const useProfile = () => {
     const [participating, setParticipating] = useState([]);
     const [won, setWon] = useState([]);
     const [ratings, setRatings] = useState([]);
+    const [upgradeRequest, setUpgradeRequest] = useState(null);
     const { showToast } = useToast();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const [profileData, watchlistData, participatingData, wonData, ratingsData] = await Promise.all([
+            const [profileData, watchlistData, participatingData, wonData, ratingsData, upgradeRequestData] = await Promise.all([
                 authService.getProfile(),
                 userService.getWatchlist(),
                 userService.getParticipating(),
                 userService.getWonAuctions(),
-                userService.getRatings()
+                userService.getRatings(),
+                userService.getUpgradeRequest()
             ]);
 
             setProfile(profileData);
@@ -28,6 +30,7 @@ export const useProfile = () => {
             setParticipating(participatingData);
             setWon(wonData);
             setRatings(ratingsData);
+            setUpgradeRequest(upgradeRequestData);
 
         } catch (error) {
             console.error('Error fetching profile data:', error);
@@ -77,6 +80,18 @@ export const useProfile = () => {
         }
     };
 
+    const submitUpgradeRequest = async (reason) => {
+        try {
+            const data = await userService.requestUpgrade(reason);
+            setUpgradeRequest(data.request);
+            showToast('Upgrade request submitted successfully', 'success');
+            return true;
+        } catch (error) {
+            showToast(error.response?.data?.message || 'Failed to submit upgrade request', 'error');
+            return false;
+        }
+    };
+
     return {
         loading,
         profile,
@@ -84,9 +99,11 @@ export const useProfile = () => {
         participating,
         won,
         ratings,
+        upgradeRequest,
         updateProfile,
         changePassword,
         submitFeedback,
+        submitUpgradeRequest,
         refreshData: fetchData
     };
 };
