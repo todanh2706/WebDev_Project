@@ -17,6 +17,7 @@ import AdminLayout from './components/layout/AdminLayout';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminUpgradeRequests from './pages/admin/AdminUpgradeRequests';
+import AdminSettings from './pages/admin/AdminSettings';
 
 import ProtectedRoute from './components/common/ProtectedRoute';
 
@@ -56,6 +57,7 @@ const AppContent = () => {
           <Route path="edit/products" element={<AdminProducts />} />
           <Route path="edit/users" element={<AdminUsers />} />
           <Route path="manage/upgraderequests" element={<AdminUpgradeRequests />} />
+          <Route path="manage/settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </>

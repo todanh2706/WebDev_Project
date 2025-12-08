@@ -3,7 +3,7 @@ import { Navbar, Nav, Container, NavDropdown, Row, Col } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../common/Button';
-import { productService } from '../../services/productService';
+import { categoriesService } from '../../services/categoriesService';
 import {
     FaUserCircle, FaGavel, FaSignOutAlt, FaUser, FaChevronRight,
     FaMobileAlt, FaLaptop, FaHeadphones, FaCamera, FaHome, FaGamepad, FaTshirt, FaSearch
@@ -19,7 +19,7 @@ const TopNavBar = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const data = await productService.getCategories();
+                const data = await categoriesService.getCategories();
                 setCategories(data);
                 if (data.length > 0) {
                     setActiveCategory(data[0].id);

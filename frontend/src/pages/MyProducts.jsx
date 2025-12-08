@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../contexts/authContext';
 import { Container, Row, Col, Spinner, Badge, Alert } from 'react-bootstrap';
 import { productService } from '../services/productService';
 import ProductCard from '../components/products/ProductCard';
@@ -8,11 +9,14 @@ import Button from '../components/common/Button';
 import AddProductModal from '../components/products/AddProductModal';
 
 const MyProducts = () => {
+    const { user } = useContext(AuthContext);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [showAddModal, setShowAddModal] = useState(false);
+
+    const isSeller = user && (user.role === 1 || user.role === 2); // 1: Seller, 2: Admin
 
     const fetchMyProducts = async (page) => {
         setLoading(true);
@@ -48,12 +52,14 @@ const MyProducts = () => {
                         <FaBoxOpen className="text-auction-primary" />
                         My Products
                     </h2>
-                    <Button
-                        onClick={() => setShowAddModal(true)}
-                        className="py-2 px-4 rounded-pill fs-6 d-flex align-items-center gap-2"
-                    >
-                        <FaPlus /> Add Product
-                    </Button>
+                    {isSeller && (
+                        <Button
+                            onClick={() => setShowAddModal(true)}
+                            className="py-2 px-4 rounded-pill fs-6 d-flex align-items-center gap-2"
+                        >
+                            <FaPlus /> Add Product
+                        </Button>
+                    )}
                 </div>
 
                 {loading ? (

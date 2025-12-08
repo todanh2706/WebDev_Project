@@ -3,8 +3,9 @@ import ProductController from '../controllers/productController.js'
 import CategoryController from '../controllers/categoryController.js'; // Added import for CategoryController
 import UserController from '../controllers/userController.js';
 import FeedbackController from '../controllers/feedbackController.js';
-import { authenticateToken, isAdmin } from '../middleware/authMiddleware.js';
+import { authenticateToken, isAdmin, isSeller } from '../middleware/authMiddleware.js';
 import AdminController from '../controllers/adminController.js';
+import SystemController from '../controllers/systemController.js';
 import upload from '../middleware/upload.js';
 
 export default (app) => {
@@ -15,7 +16,7 @@ export default (app) => {
     app.post('/api/verify-otp', AuthController.verifyOTP);
 
     // Product Routes
-    app.post('/api/products', authenticateToken, upload.array('images', 10), ProductController.createProduct);
+    app.post('/api/products', authenticateToken, isSeller, upload.array('images', 10), ProductController.createProduct);
     app.get('/api/products', ProductController.getAll);
     app.get('/api/products/latest-bidded', ProductController.getLatestBidded);
     app.get('/api/products/most-bidded', ProductController.getMostBidded);
@@ -55,6 +56,10 @@ export default (app) => {
     app.post('/api/admin/upgrade-requests/:requestId/approve', authenticateToken, isAdmin, AdminController.approveUpgradeRequest);
     app.post('/api/admin/upgrade-requests/:requestId/reject', authenticateToken, isAdmin, AdminController.rejectUpgradeRequest);
     app.delete('/api/admin/products/:id', authenticateToken, isAdmin, AdminController.deleteProduct);
+
+    // System Settings Routes
+    app.get('/api/admin/settings', authenticateToken, isAdmin, SystemController.getSettings);
+    app.put('/api/admin/settings', authenticateToken, isAdmin, SystemController.updateSettings);
 
     app.get('/', (req, res) => {
         res.send('Backend is running!');

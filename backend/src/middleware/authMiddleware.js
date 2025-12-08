@@ -32,3 +32,18 @@ export const isAdmin = (req, res, next) => {
 
     next();
 };
+
+export const isSeller = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Check for 'SELLER' (role ID 1) or 'ADMIN' (role ID 2)
+    const isSellerOrAdmin = req.user.role === 1 || req.user.role === 2;
+
+    if (!isSellerOrAdmin) {
+        return res.status(403).json({ error: 'Access denied! Seller rights required.' });
+    }
+
+    next();
+};

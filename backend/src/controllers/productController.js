@@ -613,7 +613,7 @@ export default {
     createProduct: async (req, res) => {
         const t = await db.sequelize.transaction();
         try {
-            const { name, category_id, description, starting_price, step_price, buy_now_price, is_auto_extend } = req.body;
+            const { name, category_id, description, starting_price, step_price, buy_now_price, is_auto_extend, end_date } = req.body;
             const sellerId = req.user.id;
             const files = req.files;
 
@@ -638,7 +638,7 @@ export default {
                 step_price,
                 buy_now_price: buy_now_price || null,
                 post_date: new Date(),
-                end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 7 days
+                end_date: end_date ? new Date(end_date) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 7 days if not provided
                 is_auto_extend: is_auto_extend === 'true', // FormData sends strings
                 status: 'active'
             }, { transaction: t });

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { productService } from '../services/productService';
-import { categoryService } from '../services/categoryService';
+import { categoriesService } from '../services/categoriesService';
 
 const useAddProductForm = (show, onProductAdded, onHide) => {
     const { showToast } = useToast();
@@ -20,6 +20,7 @@ const useAddProductForm = (show, onProductAdded, onHide) => {
         starting_price: '',
         step_price: '',
         buy_now_price: '',
+        end_date: '',
         is_auto_extend: true
     });
 
@@ -31,7 +32,7 @@ const useAddProductForm = (show, onProductAdded, onHide) => {
         if (show && !fetchedCategories) {
             const fetchCategories = async () => {
                 try {
-                    const data = await categoryService.getCategories();
+                    const data = await categoriesService.getCategories();
                     setCategories(data);
                     setFetchedCategories(true);
                 } catch (error) {
@@ -95,12 +96,26 @@ const useAddProductForm = (show, onProductAdded, onHide) => {
             return;
         }
 
+        if (formData.end_date) {
+            const selectedDate = new Date(formData.end_date);
+            const now = new Date();
+            // Validate that the date is at least 10 minutes in the future
+            if (selectedDate <= new Date(now.getTime() + 10 * 60000)) {
+                showToast('Expiration date must be at least 10 minutes in the future', 'error');
+                return;
+            }
+        }
+
         setLoading(true);
 
         try {
             const data = new FormData();
             Object.keys(formData).forEach(key => {
-                data.append(key, formData[key]);
+                if (key === 'end_date' && formData[key]) {
+                    data.append(key, new Date(formData[key]).toISOString());
+                } else {
+                    data.append(key, formData[key]);
+                }
             });
 
             images.forEach(image => {
@@ -120,6 +135,7 @@ const useAddProductForm = (show, onProductAdded, onHide) => {
                 starting_price: '',
                 step_price: '',
                 buy_now_price: '',
+                end_date: '',
                 is_auto_extend: true
             });
             setImages([]);

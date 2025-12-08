@@ -55,6 +55,13 @@ const AdminNavBar = () => {
                         >
                             Upgrade Requests
                         </Nav.Link>
+                        <Nav.Link
+                            as={Link}
+                            to="/admin/manage/settings"
+                            className={`nav-link-auction ${isActive('/admin/manage/settings') ? 'active' : ''}`}
+                        >
+                            Expiration Management
+                        </Nav.Link>
                     </Nav>
 
                     <Nav className="align-items-center gap-3">

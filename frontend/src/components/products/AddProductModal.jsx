@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Form, Spinner } from 'react-bootstrap';
 import Button from '../common/Button';
 import { Editor } from '@tinymce/tinymce-react';
-import { FaTag, FaDollarSign, FaImage } from 'react-icons/fa';
+import { FaTag, FaDollarSign, FaImage, FaClock } from 'react-icons/fa';
 import useAddProductForm from '../../hooks/useAddProductForm';
 
 const AddProductModal = ({ show, onHide, onProductAdded }) => {
@@ -33,7 +33,7 @@ const AddProductModal = ({ show, onHide, onProductAdded }) => {
             <div className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
                     <h4 className="text-white fw-bold m-0">Add New Product</h4>
-                    <Button variant="link" onClick={onHide} className="text-white-50 text-decoration-none fs-4">&times;</Button>
+                    {/* <Button variant="link" onClick={onHide} className="text-white-50 text-decoration-none fs-4">&times;</Button> */}
                 </div>
 
                 <Form onSubmit={handleSubmit}>
@@ -116,6 +116,21 @@ const AddProductModal = ({ show, onHide, onProductAdded }) => {
                                     min="0"
                                 />
                             </Form.Group>
+
+                        </div>
+
+                        {/* End Date */}
+                        <div className="col-md-6">
+                            <Form.Group>
+                                <Form.Label className="text-auction-primary"><FaClock className="me-2" />Auction End Date</Form.Label>
+                                <Form.Control
+                                    type="datetime-local"
+                                    name="end_date"
+                                    value={formData.end_date}
+                                    onChange={handleChange}
+                                    className="form-control-glass"
+                                />
+                            </Form.Group>
                         </div>
 
                         {/* Images */}
@@ -151,7 +166,7 @@ const AddProductModal = ({ show, onHide, onProductAdded }) => {
                         <div className="col-12">
                             <Form.Group>
                                 <Form.Label className="text-auction-primary">Description</Form.Label>
-                                <div className="bg-white rounded text-dark overflow-hidden">
+                                <div className="rounded overflow-hidden border border-secondary border-opacity-25">
                                     <Editor
                                         apiKey={import.meta.env.VITE_TINYMCE_API_KEY}
                                         onInit={(evt, editor) => editorRef.current = editor}
@@ -160,6 +175,8 @@ const AddProductModal = ({ show, onHide, onProductAdded }) => {
                                         init={{
                                             height: 200,
                                             menubar: false,
+                                            skin: "oxide-dark",
+                                            content_css: "dark",
                                             plugins: [
                                                 'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                                                 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
@@ -169,7 +186,7 @@ const AddProductModal = ({ show, onHide, onProductAdded }) => {
                                                 'bold italic forecolor | alignleft aligncenter ' +
                                                 'alignright alignjustify | bullist numlist outdent indent | ' +
                                                 'removeformat | help',
-                                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+                                            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px; background-color: #000; color: #fff; }'
                                         }}
                                     />
                                 </div>
@@ -200,8 +217,8 @@ const AddProductModal = ({ show, onHide, onProductAdded }) => {
                         </Button>
                     </div>
                 </Form>
-            </div>
-        </Modal>
+            </div >
+        </Modal >
     );
 };
 

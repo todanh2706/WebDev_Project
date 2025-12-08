@@ -1,10 +1,14 @@
 export const formatTimeLeft = (endTime) => {
     const total = Date.parse(endTime) - Date.parse(new Date());
     if (total <= 0) return 'Expired';
+
     const days = Math.floor(total / (1000 * 60 * 60 * 24));
     const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((total / 1000 / 60) % 60);
+
     if (days > 0) return `${days}d ${hours}h left`;
-    return `${hours}h left`;
+    if (hours > 0) return `${hours}h ${minutes}m left`;
+    return `${minutes}m left`;
 };
 
 export const maskName = (name) => {
