@@ -6,6 +6,7 @@ const ProductsImage = db.ProductsImage;
 
 const BidPermissionRequest = db.BidPermissionRequest;
 const Feedbacks = db.Feedbacks;
+import fs from 'fs';
 
 export default {
     getLatestBidded: async (req, res) => {
@@ -606,6 +607,65 @@ export default {
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error updating request' });
+        }
+    },
+
+    createProduct: async (req, res) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const { name, category_id, description, starting_price, step_price, buy_now_price, is_auto_extend } = req.body;
+            const sellerId = req.user.id;
+            const files = req.files;
+
+            // Validation
+            if (!files || files.length < 3) {
+                await t.rollback();
+                // Clean up uploaded files
+                if (files) {
+                    files.forEach(file => fs.unlinkSync(file.path));
+                }
+                return res.status(400).json({ message: 'At least 3 photos are required' });
+            }
+
+            // Create product
+            const product = await Products.create({
+                seller_id: sellerId,
+                category_id,
+                name,
+                description,
+                starting_price,
+                current_price: starting_price,
+                step_price,
+                buy_now_price: buy_now_price || null,
+                post_date: new Date(),
+                end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 7 days
+                is_auto_extend: is_auto_extend === 'true', // FormData sends strings
+                status: 'active'
+            }, { transaction: t });
+
+            // Create images
+            const imagePromises = files.map((file, index) => {
+                return ProductsImage.create({
+                    product_id: product.id,
+                    image_url: `/uploads/products/${file.filename}`,
+                    is_thumbnail: index === 0
+                }, { transaction: t });
+            });
+
+            await Promise.all(imagePromises);
+
+            await t.commit();
+            res.status(201).json({ message: 'Product created successfully', product });
+        } catch (error) {
+            await t.rollback();
+            // Clean up uploaded files
+            if (req.files) {
+                req.files.forEach(file => {
+                    if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+                });
+            }
+            console.error(error);
+            res.status(500).json({ message: 'Error creating product' });
         }
     }
 };

@@ -41,11 +41,6 @@ export const productService = {
         return response.data;
     },
 
-    getCategories: async () => {
-        const response = await api.get('/categories');
-        return response.data;
-    },
-
     requestBidPermission: async (productId) => {
         const response = await api.post(`/products/${productId}/bid-request`);
         return response.data;
@@ -67,6 +62,15 @@ export const productService = {
 
     handleBidRequest: async (requestId, status) => {
         const response = await api.put(`/seller/bid-requests/${requestId}`, { status });
+        return response.data;
+    },
+
+    createProduct: async (formData) => {
+        const response = await api.post('/products', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data;
     },
     getMyProducts: async (page = 1, limit = 12) => {

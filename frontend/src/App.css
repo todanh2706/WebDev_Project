@@ -706,3 +706,29 @@ select.text-auction-primary option {
     /* Edge 12-18 */
     color: rgba(255, 255, 255, 0.7) !important;
 }
+
+/* Glass Form Controls */
+.form-control-glass,
+.form-select-glass {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(108, 117, 125, 0.5) !important;
+    color: white !important;
+    transition: all 0.3s ease;
+}
+
+.form-control-glass:focus,
+.form-select-glass:focus {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    border-color: var(--auction-primary) !important;
+    box-shadow: 0 0 0 0.25rem rgba(218, 165, 32, 0.25) !important;
+    color: white !important;
+}
+
+.form-control-glass::placeholder {
+    color: rgba(218, 165, 32, 0.5) !important;
+}
+
+.form-select-glass option {
+    background-color: #000;
+    color: var(--auction-primary);
+}

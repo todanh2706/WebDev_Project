@@ -5,6 +5,7 @@ import UserController from '../controllers/userController.js';
 import FeedbackController from '../controllers/feedbackController.js';
 import { authenticateToken, isAdmin } from '../middleware/authMiddleware.js';
 import AdminController from '../controllers/adminController.js';
+import upload from '../middleware/upload.js';
 
 export default (app) => {
     app.post('/api/register', AuthController.register);
@@ -14,6 +15,7 @@ export default (app) => {
     app.post('/api/verify-otp', AuthController.verifyOTP);
 
     // Product Routes
+    app.post('/api/products', authenticateToken, upload.array('images', 10), ProductController.createProduct);
     app.get('/api/products', ProductController.getAll);
     app.get('/api/products/latest-bidded', ProductController.getLatestBidded);
     app.get('/api/products/most-bidded', ProductController.getMostBidded);
