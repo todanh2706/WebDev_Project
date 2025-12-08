@@ -11,6 +11,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import TopNavBar from './components/layout/TopNavBar';
 import SearchResults from './pages/SearchResults';
 import AllProducts from './pages/AllProducts';
+import MyProducts from './pages/MyProducts';
 import Profile from './pages/Profile';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -40,6 +41,11 @@ const AppContent = () => {
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-products" element={
+          <ProtectedRoute>
+            <MyProducts />
           </ProtectedRoute>
         } />
         <Route path="/admin" element={

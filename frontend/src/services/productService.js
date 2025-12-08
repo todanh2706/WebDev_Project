@@ -54,5 +54,9 @@ export const productService = {
     checkBidPermission: async (id) => {
         const response = await api.get(`/products/${id}/bid-permission`);
         return response.data;
+    },
+    getMyProducts: async (page = 1, limit = 12) => {
+        const response = await api.get(`/user/my-products?page=${page}&limit=${limit}`);
+        return response.data;
     }
 };

@@ -91,6 +91,59 @@ export default {
         }
     },
 
+    getMyProducts: async (req, res) => {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 12;
+            const offset = (page - 1) * limit;
+
+            const products = await Products.findAll({
+                where: { seller_id: req.user.id },
+                attributes: {
+                    include: [
+                        [db.sequelize.fn('COUNT', db.sequelize.col('bids.bid_id')), 'bid_count']
+                    ]
+                },
+                include: [
+                    {
+                        model: Bid,
+                        as: 'bids',
+                        attributes: []
+                    },
+                    {
+                        model: ProductsImage,
+                        as: 'images',
+                        attributes: ['image_url'],
+                        where: { is_thumbnail: true },
+                        required: false
+                    },
+                    {
+                        model: db.Users,
+                        as: 'current_winner',
+                        attributes: ['name']
+                    }
+                ],
+                group: ['Products.id', 'images.id', 'current_winner.id'],
+                order: [['createdAt', 'DESC']],
+                limit: limit,
+                offset: offset,
+                subQuery: false
+            });
+
+            const totalItems = await Products.count({ where: { seller_id: req.user.id } });
+
+            res.json({
+                totalItems,
+                totalPages: Math.ceil(totalItems / limit),
+                currentPage: page,
+                products: products
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching my products' });
+        }
+    },
+
     getByCategory: async (req, res) => {
         try {
             const { id } = req.params;
@@ -240,9 +293,14 @@ export default {
                         model: db.Users,
                         as: 'current_winner',
                         attributes: ['name']
+                    },
+                    {
+                        model: db.Categories,
+                        as: 'category',
+                        attributes: ['name']
                     }
                 ],
-                group: ['Products.id', 'images.id', 'current_winner.id'],
+                group: ['Products.id', 'images.id', 'current_winner.id', 'category.id'],
                 order: order,
                 limit: limit,
                 offset: offset,

@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { Pagination, Spinner, Badge } from 'react-bootstrap';
+import { Spinner, Badge } from 'react-bootstrap';
+import Pagination from '../../components/common/Pagination';
 import { adminService } from '../../services/adminService';
 import { usePaginationData } from '../../hooks/usePaginationData';
 import { useToast } from '../../contexts/ToastContext';
@@ -91,23 +92,11 @@ const AdminUpgradeRequests = () => {
 
             {totalPages > 1 && (
                 <div className="d-flex justify-content-center mt-4">
-                    <Pagination className="pagination-auction">
-                        <Pagination.First onClick={() => handlePageChange(1)} disabled={page === 1} />
-                        <Pagination.Prev onClick={() => handlePageChange(page - 1)} disabled={page === 1} />
-
-                        {[...Array(totalPages)].map((_, idx) => (
-                            <Pagination.Item
-                                key={idx + 1}
-                                active={idx + 1 === page}
-                                onClick={() => handlePageChange(idx + 1)}
-                            >
-                                {idx + 1}
-                            </Pagination.Item>
-                        ))}
-
-                        <Pagination.Next onClick={() => handlePageChange(page + 1)} disabled={page === totalPages} />
-                        <Pagination.Last onClick={() => handlePageChange(totalPages)} disabled={page === totalPages} />
-                    </Pagination>
+                    <Pagination
+                        currentPage={page}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
                 </div>
             )}
         </div>

@@ -129,7 +129,7 @@ const TopNavBar = () => {
                             )}
                         </div>
 
-                        <Nav.Link as={Link} to="/myauctions" className="nav-link-auction mx-2">My Auctions</Nav.Link>
+                        <Nav.Link as={Link} to="/my-products" className="nav-link-auction mx-2">My Products</Nav.Link>
                     </Nav>
 
                     <div className="d-flex align-items-center mx-3 flex-grow-1" style={{ maxWidth: '400px' }}>

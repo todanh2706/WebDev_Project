@@ -23,7 +23,7 @@ const ProductTable = ({ products, onDelete }) => {
                             <td>#{String(product.id || product._id).slice(-6)}</td>
                             <td>
                                 <img
-                                    src={product.images?.[0] || 'https://via.placeholder.com/50'}
+                                    src={product.images?.[0]?.image_url || 'https://via.placeholder.com/50'}
                                     alt={product.name}
                                     className="rounded"
                                     style={{ width: '40px', height: '40px', objectFit: 'cover' }}
@@ -31,7 +31,7 @@ const ProductTable = ({ products, onDelete }) => {
                             </td>
                             <td>{product.name}</td>
                             <td>{product.category?.name || 'N/A'}</td>
-                            <td className="text-auction-primary fw-bold">${product.currentPrice || product.startingPrice}</td>
+                            <td className="text-auction-primary fw-bold">${product.current_price || product.starting_price}</td>
                             <td>
                                 <Badge bg={product.status === 'active' ? 'success' : 'secondary'}>
                                     {product.status || 'Active'}

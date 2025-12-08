@@ -41,6 +41,7 @@ export default (app) => {
     app.get('/api/user/ratings', authenticateToken, UserController.getRatings);
     app.post('/api/user/upgrade-request', authenticateToken, UserController.requestUpgrade);
     app.get('/api/user/upgrade-request', authenticateToken, UserController.getUpgradeRequest);
+    app.get('/api/user/my-products', authenticateToken, ProductController.getMyProducts);
 
     // Feedback Routes
     app.post('/api/feedbacks', authenticateToken, FeedbackController.create);
