@@ -76,5 +76,9 @@ export const productService = {
     getMyProducts: async (page = 1, limit = 12) => {
         const response = await api.get(`/user/my-products?page=${page}&limit=${limit}`);
         return response.data;
+    },
+    appendDescription: async (id, description) => {
+        const response = await api.post(`/products/${id}/description`, { description });
+        return response.data;
     }
 };

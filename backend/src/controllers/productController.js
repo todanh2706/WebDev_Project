@@ -3,6 +3,7 @@ import db from '../models/index.js';
 const Products = db.Products;
 const Bid = db.Bid;
 const ProductsImage = db.ProductsImage;
+const SystemSettings = db.SystemSettings;
 
 const BidPermissionRequest = db.BidPermissionRequest;
 const Feedbacks = db.Feedbacks;
@@ -428,7 +429,7 @@ export default {
             const goodRatings = ratings.filter(r => r.rating === 'good').length;
             const score = totalRatings > 0 ? (goodRatings / totalRatings) * 100 : 100;
 
-            // Rule: Must have >= 5 ratings AND >= 80% score.
+            // Must have >= 5 ratings and >= 80% score.
             // If not, must have approved permission request.
             let isEligible = totalRatings >= 5 && score >= 80;
 
@@ -471,11 +472,52 @@ export default {
                 bid_time: new Date()
             }, { transaction: t });
 
+            // Auto-extension logic
+            let newEndDate = null;
+            if (product.is_auto_extend) {
+                const settings = await SystemSettings.findAll({ transaction: t });
+                const settingsMap = {};
+                settings.forEach(s => settingsMap[s.key] = s.value);
+
+                const thresholdMinutes = parseInt(settingsMap['auction_threshold_minutes'] || '5');
+                const extensionMinutes = parseInt(settingsMap['auction_extension_minutes'] || '10');
+
+                const now = new Date();
+                const endDate = new Date(product.end_date);
+                const timeRemainingMillis = endDate.getTime() - now.getTime();
+                const thresholdMillis = thresholdMinutes * 60 * 1000;
+
+                console.log('***** Auto Extension Debug *****');
+                console.log('Product ID:', product.id);
+                console.log('Is Auto Extend:', product.is_auto_extend);
+                console.log('Now:', now.toISOString());
+                console.log('End Date:', endDate.toISOString());
+                console.log('Time Remaining (ms):', timeRemainingMillis);
+                console.log('Threshold (ms):', thresholdMillis);
+                console.log('Settings:', settingsMap);
+
+                if (timeRemainingMillis > 0 && timeRemainingMillis <= thresholdMillis) {
+                    newEndDate = new Date(endDate.getTime() + (extensionMinutes * 60 * 1000));
+                    console.log('***** EXTENDING AUCTION to:', newEndDate.toISOString());
+                } else {
+                    console.log('***** Condition NOT met for extension.');
+                }
+            } else {
+                console.log('***** Auto Extension Debug: Product is NOT auto-extend *****');
+            }
+
             // Update product
-            await product.update({
+            const updateData = {
                 current_price: amount,
-                current_winner_id: userId
-            }, { transaction: t });
+                current_winner_id: userId,
+                buy_now_price: null // Remove Buy Now option once a bid is placed
+            };
+
+            if (newEndDate) {
+                updateData.end_date = newEndDate;
+            }
+
+            await product.update(updateData, { transaction: t });
 
             await t.commit();
             res.json({ message: 'Bid placed successfully' });
@@ -666,6 +708,40 @@ export default {
             }
             console.error(error);
             res.status(500).json({ message: 'Error creating product' });
+        }
+    },
+
+    appendDescription: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { description } = req.body;
+            const userId = req.user.id;
+
+            if (!description || !description.trim()) {
+                return res.status(400).json({ message: 'Description text is required' });
+            }
+
+            const product = await Products.findByPk(id);
+
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            if (product.seller_id !== userId) {
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+
+            const timestamp = new Date().toLocaleString();
+            const appendText = `\n\n<hr class="my-3 border-secondary" /><p class="mb-1"><strong class="text-warning">Update [${timestamp}]:</strong></p><p>${description}</p>`;
+
+            const newDescription = (product.description || '') + appendText;
+
+            await product.update({ description: newDescription });
+
+            res.json({ message: 'Description updated successfully', description: newDescription });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error updating description' });
         }
     }
 };

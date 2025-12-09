@@ -44,7 +44,7 @@ export default (sequelize, DataTypes) => {
         },
         buy_now_price: {
             type: DataTypes.DECIMAL(15, 2),
-            allowNull: false
+            allowNull: true
         },
         post_date: {
             type: DataTypes.DATE,

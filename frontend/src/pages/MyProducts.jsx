@@ -7,6 +7,7 @@ import Pagination from '../components/common/Pagination';
 import { FaBoxOpen, FaPlus } from 'react-icons/fa';
 import Button from '../components/common/Button';
 import AddProductModal from '../components/products/AddProductModal';
+import AppendDescriptionModal from '../components/products/AppendDescriptionModal';
 
 const MyProducts = () => {
     const { user } = useContext(AuthContext);
@@ -41,7 +42,15 @@ const MyProducts = () => {
     };
 
     const handleProductAdded = () => {
-        fetchMyProducts(1); // Refresh list
+        fetchMyProducts(currentPage); // Refresh list
+    };
+
+    const [showUpdateDescModal, setShowUpdateDescModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+
+    const handleUpdateDescription = (product) => {
+        setSelectedProduct(product);
+        setShowUpdateDescModal(true);
     };
 
     return (
@@ -71,7 +80,11 @@ const MyProducts = () => {
                         <Row xs={1} md={2} lg={3} className="g-4 mb-5">
                             {products.map(product => (
                                 <Col key={product.id}>
-                                    <ProductCard product={product} isOwner={true} />
+                                    <ProductCard
+                                        product={product}
+                                        isOwner={true}
+                                        onUpdateDescription={handleUpdateDescription}
+                                    />
                                 </Col>
                             ))}
                         </Row>
@@ -94,6 +107,13 @@ const MyProducts = () => {
                 show={showAddModal}
                 onHide={() => setShowAddModal(false)}
                 onProductAdded={handleProductAdded}
+            />
+
+            <AppendDescriptionModal
+                show={showUpdateDescModal}
+                onHide={() => setShowUpdateDescModal(false)}
+                product={selectedProduct}
+                onSuccess={handleProductAdded}
             />
         </div>
     );

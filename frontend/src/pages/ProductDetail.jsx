@@ -165,9 +165,11 @@ const ProductDetail = () => {
 
                         <div className="glass-panel p-4 rounded-4">
                             <h4 className="text-white fw-bold mb-3">Description</h4>
-                            <p className="text-white-50 mb-0" style={{ lineHeight: '1.8' }}>
-                                {product.description}
-                            </p>
+                            <div
+                                className="text-white-50 mb-0 description-content"
+                                style={{ lineHeight: '1.8' }}
+                                dangerouslySetInnerHTML={{ __html: product.description }}
+                            />
                         </div>
                     </Col>
 

@@ -3,11 +3,11 @@ import { Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Button from '../common/Button';
 import { useWatchlist } from '../../contexts/WatchlistContext';
-import { FaEye, FaClock, FaHeart, FaRegHeart, FaStar, FaUsersCog } from 'react-icons/fa';
+import { FaEye, FaClock, FaHeart, FaRegHeart, FaStar, FaUsersCog, FaPen } from 'react-icons/fa';
 import { formatTimeLeft, maskName, formatDate, isNew } from '../../utils/formatters';
 import BidRequestModal from './BidRequestModal';
 
-const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner }) => {
+const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner, onUpdateDescription }) => {
     const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date, id } = product;
     const imageUrl = images && images.length > 0 ? images[0].image_url : 'https://placehold.co/600x400?text=No+Image';
 
@@ -143,12 +143,26 @@ const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner }) => {
                             </Link>
 
                             {isOwner && (
-                                <Button
-                                    className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm bg-warning text-dark border-warning"
-                                    onClick={() => setShowRequestModal(true)}
-                                >
-                                    <FaUsersCog /> Manage Requests
-                                </Button>
+                                <>
+                                    <Button
+                                        className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm view-details-btn"
+                                        onClick={() => setShowRequestModal(true)}
+                                    >
+                                        <FaUsersCog /> Manage Requests
+                                    </Button>
+
+                                    {isOwner && onUpdateDescription && (
+                                        <Button
+                                            className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm view-details-btn"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onUpdateDescription(product);
+                                            }}
+                                        >
+                                            <FaPen /> Update Description
+                                        </Button>
+                                    )}
+                                </>
                             )}
                         </div>
 
