@@ -175,8 +175,6 @@ const ProductDetail = () => {
 
                         {/* Bid History Panel */}
                         <BidHistory productId={product.id} />
-
-
                     </Col>
 
                     {/* Product Info & Bidding */}
