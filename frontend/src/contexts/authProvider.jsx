@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const logout = async () => {
+    const logout = async (shouldRedirect = true) => {
         try {
             await authService.logout();
         } catch (error) {
@@ -88,7 +88,10 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
-        navigate('/login');
+
+        if (shouldRedirect) {
+            navigate('/login');
+        }
     };
 
     const verifyOTP = async (email, otp) => {

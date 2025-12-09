@@ -101,7 +101,7 @@ export default {
             const accessToken = jwt.sign(
                 { id: user.id, email: user.email, role: user.role },
                 process.env.JWT_SECRET || 'access_secret',
-                { expiresIn: '15m' }
+                { expiresIn: '1d' }
             );
 
             const refreshToken = jwt.sign(

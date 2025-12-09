@@ -181,11 +181,12 @@ const TopNavBar = () => {
                                 <Nav.Link as={Link} to="/login" className="text-light fw-medium px-3">
                                     Log In
                                 </Nav.Link>
-                                <Link to="/register" className="text-decoration-none">
-                                    <Button className="btn-sm px-4 rounded-pill">
-                                        Register
-                                    </Button>
-                                </Link>
+                                <Button
+                                    variant="outline-light"
+                                    onClick={() => navigate('/register')}
+                                >
+                                    Register
+                                </Button>
                             </>
                         )}
                     </Nav>

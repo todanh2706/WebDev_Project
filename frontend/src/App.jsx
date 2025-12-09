@@ -20,11 +20,40 @@ import AdminUpgradeRequests from './pages/admin/AdminUpgradeRequests';
 import AdminSettings from './pages/admin/AdminSettings';
 
 import ProtectedRoute from './components/common/ProtectedRoute';
+import SessionExpiredModal from './components/common/SessionExpiredModal';
+import { useAuth } from './hooks/useAuth';
+import { useState, useEffect } from 'react';
 
 const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-otp';
   const isAdminPage = location.pathname.startsWith('/admin');
+
+  // Session Expiration Logic
+  const { logout } = useAuth();
+  const [showSessionExpiredModal, setShowSessionExpiredModal] = useState(false);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setShowSessionExpiredModal(true);
+    };
+
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+
+    return () => {
+      window.removeEventListener('auth:session-expired', handleSessionExpired);
+    };
+  }, []);
+
+  const handleSessionExpiredConfirm = () => {
+    setShowSessionExpiredModal(false);
+    logout(true); // Redirect to login
+  };
+
+  const handleSessionExpiredCancel = () => {
+    setShowSessionExpiredModal(false);
+    logout(false); // Update state but stay on page
+  };
 
   return (
     <>
@@ -60,6 +89,12 @@ const AppContent = () => {
           <Route path="manage/settings" element={<AdminSettings />} />
         </Route>
       </Routes>
+
+      <SessionExpiredModal
+        show={showSessionExpiredModal}
+        onConfirm={handleSessionExpiredConfirm}
+        onCancel={handleSessionExpiredCancel}
+      />
     </>
   )
 }

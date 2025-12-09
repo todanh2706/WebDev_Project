@@ -19,4 +19,16 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
+// Add a response interceptor to handle session expiration
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            // Dispatch a custom event that App.jsx can listen to
+            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;

@@ -58,15 +58,15 @@ const BidHistory = ({ productId }) => {
                 <Table hover className="mb-0 text-white bg-transparent">
                     <thead className="bg-black bg-opacity-50">
                         <tr>
-                            <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold" style={{ width: '35%' }}>
+                            <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold w-35">
                                 <FaCalendarAlt className="me-2" />
                                 Date Time
                             </th>
-                            <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold" style={{ width: '35%' }}>
+                            <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold w-35">
                                 <FaUser className="me-2" />
                                 Bidder
                             </th>
-                            <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold text-end" style={{ width: '30%' }}>
+                            <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold text-end w-30">
                                 <FaTag className="me-2" />
                                 Price
                             </th>
@@ -75,13 +75,13 @@ const BidHistory = ({ productId }) => {
                     <tbody>
                         {bids.map((bid) => (
                             <tr key={bid.bid_id} className="align-middle">
-                                <td className="py-3 px-4 border-secondary border-opacity-10 bg-transparent text-white-50">
+                                <td className="py-3 px-4 table-transparent-cell text-auction-muted">
                                     {formatDate(bid.bid_time)}
                                 </td>
-                                <td className="py-3 px-4 border-secondary border-opacity-10 bg-transparent text-white">
+                                <td className="py-3 px-4 table-transparent-cell text-white">
                                     {bid.bidder ? bid.bidder.name : 'Unknown'}
                                 </td>
-                                <td className="py-3 px-4 border-secondary border-opacity-10 bg-transparent text-white fw-bold text-end">
+                                <td className="py-3 px-4 table-transparent-cell text-white fw-bold text-end">
                                     ${parseFloat(bid.amount).toLocaleString()}
                                 </td>
                             </tr>

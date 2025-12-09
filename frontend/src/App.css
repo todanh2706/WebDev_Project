@@ -766,7 +766,53 @@ select.text-auction-primary option {
     cursor: pointer;
 }
 
-.form-select-glass option {
-    background-color: #000;
-    color: var(--auction-primary);
+
+/* Utility classes for table widths */
+.w-35 {
+    width: 35% !important;
+}
+
+.w-30 {
+    width: 30% !important;
+}
+
+/* Product Description Container */
+.description-container {
+    line-height: 1.8;
+}
+
+/* Generic transparent table cell */
+.table-transparent-cell {
+    background-color: transparent !important;
+    border-bottom: 1px solid rgba(108, 117, 125, 0.1) !important;
+    /* border-secondary opacity 10 */
+}
+
+.text-auction-muted {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Glass Modal Styles */
+.modal-header-glass {
+    border-bottom: 1px solid rgba(108, 117, 125, 0.25);
+}
+
+.modal-title-glass {
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.modal-body-glass {
+    color: white;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.modal-footer-glass {
+    border-top: 0;
+    padding-bottom: 1.5rem;
+    padding-right: 1.5rem;
 }
