@@ -743,5 +743,45 @@ export default {
             console.error(error);
             res.status(500).json({ message: 'Error updating description' });
         }
+    },
+
+    getProductBids: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const bids = await Bid.findAll({
+                where: { product_id: id },
+                include: [
+                    {
+                        model: db.Users,
+                        as: 'bidder',
+                        attributes: ['id', 'name']
+                    }
+                ],
+                order: [['bid_time', 'DESC']]
+            });
+
+            // Mask bidder names for privacy
+            const maskedBids = bids.map(bid => {
+                const plainBid = bid.get({ plain: true });
+                if (plainBid.bidder && plainBid.bidder.name) {
+                    const nameParts = plainBid.bidder.name.trim().split(' ');
+                    if (nameParts.length > 1) {
+                        // Keep only the last name, mask the rest
+                        plainBid.bidder.name = '***** ' + nameParts[nameParts.length - 1];
+                    } else {
+                        // If single name, mask first half
+                        const name = plainBid.bidder.name;
+                        const visibleLen = Math.ceil(name.length / 2);
+                        plainBid.bidder.name = '*****' + name.slice(-visibleLen);
+                    }
+                }
+                return plainBid;
+            });
+
+            res.json(maskedBids);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching product bids' });
+        }
     }
 };

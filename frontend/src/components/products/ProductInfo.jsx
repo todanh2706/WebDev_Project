@@ -82,17 +82,19 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
                         <FaShieldAlt /> You were rejected to bid
                     </Button>
                 ) : (
-                    <Button
-                        className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
-                        onClick={onRequestPermission}
-                    >
-                        <FaShieldAlt /> Request Permission
-                    </Button>
-                )}
-                {product.buy_now_price && (
-                    <Button variant="outline-light" className="py-3 fw-bold rounded-pill border-opacity-25">
-                        Buy Now for ${parseFloat(product.buy_now_price).toLocaleString()}
-                    </Button>
+                    <>
+                        <Button
+                            className="py-3 fs-5 fw-bold rounded-pill shadow-lg d-flex align-items-center justify-content-center gap-2"
+                            onClick={onRequestPermission}
+                        >
+                            <FaShieldAlt /> Request Permission
+                        </Button>
+                        {product.buy_now_price && (
+                            <Button variant="outline-light" className="py-3 fw-bold rounded-pill border-opacity-25">
+                                Buy Now for ${parseFloat(product.buy_now_price).toLocaleString()}
+                            </Button>
+                        )}
+                    </>
                 )}
             </div>
         </div>

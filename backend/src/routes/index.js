@@ -24,6 +24,7 @@ export default (app) => {
     app.get('/api/products/category/:id', ProductController.getByCategory);
     app.get('/api/products/search', ProductController.search);
     app.get('/api/products/:id', ProductController.getById);
+    app.get('/api/products/:id/bids', ProductController.getProductBids);
     app.post('/api/products/:id/bid', authenticateToken, ProductController.placeBid);
     app.post('/api/products/:id/description', authenticateToken, isSeller, ProductController.appendDescription);
     app.post('/api/products/:id/bid-request', authenticateToken, ProductController.requestBidPermission);

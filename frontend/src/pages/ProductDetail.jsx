@@ -10,6 +10,7 @@ import { useAuth } from '../hooks/useAuth';
 import ImageGallery from '../components/products/ImageGallery';
 import ProductInfo from '../components/products/ProductInfo';
 import BidModal from '../components/products/BidModal';
+import BidHistory from '../components/products/BidHistory';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -171,6 +172,9 @@ const ProductDetail = () => {
                                 dangerouslySetInnerHTML={{ __html: product.description }}
                             />
                         </div>
+
+                        {/* Bid History Panel */}
+                        <BidHistory productId={product.id} />
                     </Col>
 
                     {/* Product Info & Bidding */}
