@@ -11,6 +11,7 @@ import ImageGallery from '../components/products/ImageGallery';
 import ProductInfo from '../components/products/ProductInfo';
 import BidModal from '../components/products/BidModal';
 import BidHistory from '../components/products/BidHistory';
+import CommentSection from '../components/products/CommentSection';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -174,6 +175,8 @@ const ProductDetail = () => {
 
                         {/* Bid History Panel */}
                         <BidHistory productId={product.id} />
+
+
                     </Col>
 
                     {/* Product Info & Bidding */}
@@ -204,6 +207,9 @@ const ProductDetail = () => {
                                 </li>
                             </ul>
                         </div>
+
+                        {/* Comment Section */}
+                        <CommentSection productId={product.id} />
                     </Col>
                 </Row>
             </Container>

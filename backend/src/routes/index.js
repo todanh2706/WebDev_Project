@@ -6,6 +6,7 @@ import FeedbackController from '../controllers/feedbackController.js';
 import { authenticateToken, isAdmin, isSeller } from '../middleware/authMiddleware.js';
 import AdminController from '../controllers/adminController.js';
 import SystemController from '../controllers/systemController.js';
+import CommentController from '../controllers/commentController.js';
 import upload from '../middleware/upload.js';
 
 export default (app) => {
@@ -50,6 +51,10 @@ export default (app) => {
 
     // Feedback Routes
     app.post('/api/feedbacks', authenticateToken, FeedbackController.create);
+
+    // Comment Routes
+    app.get('/api/products/:id/comments', CommentController.getComments);
+    app.post('/api/products/:id/comments', authenticateToken, CommentController.addComment);
 
     // Admin Routes
     app.get('/api/admin/users', authenticateToken, isAdmin, AdminController.getUsers);

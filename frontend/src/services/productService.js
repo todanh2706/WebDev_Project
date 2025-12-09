@@ -80,5 +80,13 @@ export const productService = {
     getProductBids: async (id) => {
         const response = await api.get(`/products/${id}/bids`);
         return response.data;
+    },
+    getComments: async (id) => {
+        const response = await api.get(`/products/${id}/comments`);
+        return response.data;
+    },
+    addComment: async (id, content, parentId = null) => {
+        const response = await api.post(`/products/${id}/comments`, { content, parent_id: parentId });
+        return response.data;
     }
 };

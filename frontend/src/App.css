@@ -811,6 +811,67 @@ select.text-auction-primary option {
     padding-bottom: 1.5rem;
 }
 
+.btn-ok-glass {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    font-weight: bold;
+}
+
+/* Comment Section Styles */
+.comment-input-glass {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(218, 165, 32, 0.2) !important;
+    color: #fff !important;
+    resize: none;
+    padding-right: 100px;
+    /* Space for Post button */
+    transition: all 0.3s ease;
+}
+
+.comment-input-glass:focus {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: var(--auction-primary) !important;
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.15) !important;
+}
+
+.comment-input-glass::placeholder {
+    color: rgba(218, 165, 32, 0.5) !important;
+    /* Different color as requested */
+    font-style: italic;
+}
+
+.comment-item {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+.comment-item:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: rgba(218, 165, 32, 0.1);
+}
+
+.hover-text-warning:hover {
+    color: var(--auction-primary) !important;
+}
+
+/* Comment Item Typography & Spacing */
+.comment-time {
+    font-size: 0.75rem !important;
+}
+
+.comment-reply-btn {
+    font-size: 0.85rem !important;
+}
+
+.comment-content {
+    white-space: pre-wrap !important;
+}
+
+.post-button-overlay {
+    z-index: 5 !important;
+}
+
 .modal-footer-glass {
     border-top: 0;
     padding-bottom: 1.5rem;
