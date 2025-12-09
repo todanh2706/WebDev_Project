@@ -4,6 +4,18 @@ import { FaClock } from 'react-icons/fa';
 import { formatTimeLeft } from '../../utils/formatters';
 
 const ImageGallery = ({ images, selectedImage, setSelectedImage, productName, endDate }) => {
+    const scrollContainerRef = React.useRef(null);
+
+    const scroll = (direction) => {
+        if (scrollContainerRef.current) {
+            const scrollAmount = 120; // Width of thumbnail + gap
+            scrollContainerRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     return (
         <div className="glass-panel p-3 rounded-4 mb-4">
             <div className="position-relative rounded-3 overflow-hidden" style={{ height: '500px' }}>
@@ -19,21 +31,41 @@ const ImageGallery = ({ images, selectedImage, setSelectedImage, productName, en
                     </Badge>
                 </div>
             </div>
+
             {images && images.length > 1 && (
-                <div className="d-flex gap-3 mt-3 overflow-auto pb-2">
-                    {images.map((img, idx) => (
-                        <div
-                            key={idx}
-                            className={`cursor-pointer rounded-3 overflow-hidden border ${selectedImage === img.image_url ? 'border-auction-primary' : 'border-transparent'}`}
-                            style={{ width: '100px', height: '100px', minWidth: '100px' }}
-                            onClick={() => setSelectedImage(img.image_url)}
-                        >
-                            <Image
-                                src={img.image_url}
-                                className="w-100 h-100 object-fit-cover"
-                            />
-                        </div>
-                    ))}
+                <div className="position-relative mt-3">
+                    <div
+                        className="gallery-scroll-btn position-absolute top-50 start-0 translate-middle-y ms-1"
+                        onClick={() => scroll('left')}
+                    >
+                        &lt;
+                    </div>
+
+                    <div
+                        className="d-flex gap-3 overflow-auto px-4 gallery-thumbnails-container"
+                        ref={scrollContainerRef}
+                    >
+                        {images.map((img, idx) => (
+                            <div
+                                key={idx}
+                                className={`cursor-pointer rounded-3 overflow-hidden border border-2 flex-shrink-0 ${selectedImage === img.image_url ? 'border-auction-primary' : 'border-transparent'}`}
+                                style={{ width: '100px', height: '100px' }}
+                                onClick={() => setSelectedImage(img.image_url)}
+                            >
+                                <Image
+                                    src={img.image_url}
+                                    className="w-100 h-100 object-fit-cover"
+                                />
+                            </div>
+                        ))}
+                    </div>
+
+                    <div
+                        className="gallery-scroll-btn position-absolute top-50 end-0 translate-middle-y me-1"
+                        onClick={() => scroll('right')}
+                    >
+                        &gt;
+                    </div>
                 </div>
             )}
         </div>
