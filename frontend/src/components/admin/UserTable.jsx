@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, Button, Badge } from 'react-bootstrap';
 import { BiUser, BiPencil, BiTrash } from 'react-icons/bi';
+import { Link } from 'react-router-dom';
 
 const UserTable = ({ users, onDelete }) => {
     return (
@@ -25,7 +26,9 @@ const UserTable = ({ users, onDelete }) => {
                                     <div className="bg-secondary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px' }}>
                                         <BiUser className="text-white" />
                                     </div>
-                                    {user.name}
+                                    <Link to={`/admin/users/${user.id || user._id}`} className="text-decoration-none text-white fw-bold">
+                                        {user.name}
+                                    </Link>
                                 </div>
                             </td>
                             <td>{user.email}</td>

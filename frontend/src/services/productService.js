@@ -11,6 +11,16 @@ export const productService = {
         return response.data;
     },
 
+    getCategories: async () => {
+        const response = await api.get('/categories');
+        return response.data;
+    },
+
+    getCategoryById: async (id) => {
+        const response = await api.get(`/categories/${id}`);
+        return response.data;
+    },
+
     placeBid: async (id, amount) => {
         const response = await api.post(`/products/${id}/bid`, { amount });
         return response.data;

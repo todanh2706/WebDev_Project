@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, Button, Badge } from 'react-bootstrap';
 import { BiPencil, BiTrash } from 'react-icons/bi';
+import { Link } from 'react-router-dom';
 
 const ProductTable = ({ products, onDelete }) => {
     return (
@@ -29,7 +30,11 @@ const ProductTable = ({ products, onDelete }) => {
                                     style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                                 />
                             </td>
-                            <td>{product.name}</td>
+                            <td>
+                                <Link to={`/admin/products/${product.id || product._id}`} className="text-decoration-none text-white fw-bold">
+                                    {product.name}
+                                </Link>
+                            </td>
                             <td>{product.category?.name || 'N/A'}</td>
                             <td className="text-auction-primary fw-bold">${product.current_price || product.starting_price}</td>
                             <td>

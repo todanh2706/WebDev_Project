@@ -24,6 +24,10 @@ export default (sequelize, DataTypes) => {
             foreignKey: 'parent_id',
             as: 'subcategories'
         });
+        Categories.hasMany(models.Products, {
+            foreignKey: 'category_id',
+            as: 'products'
+        });
     }
 
     return Categories;

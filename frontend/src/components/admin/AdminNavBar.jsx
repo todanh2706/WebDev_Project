@@ -50,6 +50,13 @@ const AdminNavBar = () => {
                         </Nav.Link>
                         <Nav.Link
                             as={Link}
+                            to="/admin/categories"
+                            className={`nav-link-auction ${isActive('/admin/categories') ? 'active' : ''}`}
+                        >
+                            Categories
+                        </Nav.Link>
+                        <Nav.Link
+                            as={Link}
                             to="/admin/manage/upgraderequests"
                             className={`nav-link-auction ${isActive('/admin/manage/upgraderequests') ? 'active' : ''}`}
                         >

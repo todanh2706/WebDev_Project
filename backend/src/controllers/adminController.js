@@ -161,5 +161,70 @@ export default {
             console.error(error);
             res.status(500).json({ message: 'Error deleting product' });
         }
+    },
+
+    getUserDetails: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const user = await Users.findByPk(id, {
+                attributes: { exclude: ['password'] },
+                include: [
+                    {
+                        model: Products,
+                        as: 'products',
+                        limit: 5,
+                        order: [['createdAt', 'DESC']]
+                    },
+                    {
+                        model: Bid,
+                        as: 'bids',
+                        include: [{
+                            model: Products,
+                            as: 'product',
+                            attributes: ['id', 'name']
+                        }],
+                        limit: 5,
+                        order: [['createdAt', 'DESC']]
+                    },
+                    {
+                        model: Products,
+                        as: 'current_wins',
+                        limit: 5,
+                        order: [['createdAt', 'DESC']]
+                    },
+                    {
+                        model: db.Feedbacks,
+                        as: 'target_user_reviews',
+                        limit: 5,
+                        order: [['createdAt', 'DESC']],
+                        include: [{
+                            model: Users,
+                            as: 'reviewer',
+                            attributes: ['id', 'name']
+                        }]
+                    }
+                ]
+            });
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // We can also do a separate count if we want full stats
+            const totalProducts = await Products.count({ where: { seller_id: id } });
+
+            // To avoid complex include for ratings if association is tricky, we can simpler queries or just what we have.
+            // Let's assume 'bids' and 'products' are safe.
+
+            res.json({
+                user,
+                stats: {
+                    totalProducts
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching user details' });
+        }
     }
 };

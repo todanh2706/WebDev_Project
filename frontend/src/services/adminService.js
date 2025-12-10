@@ -11,6 +11,11 @@ export const adminService = {
         return response.data;
     },
 
+    getUserDetails: async (userId) => {
+        const response = await api.get(`/admin/users/${userId}`);
+        return response.data;
+    },
+
     getUpgradeRequests: async (page = 1, limit = 12) => {
         const response = await api.get(`/admin/upgrade-requests?page=${page}&limit=${limit}`);
         return response.data;

@@ -59,6 +59,7 @@ export default (app) => {
 
     // Admin Routes
     app.get('/api/admin/users', authenticateToken, isAdmin, AdminController.getUsers);
+    app.get('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.getUserDetails);
     app.delete('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.deleteUser);
     app.get('/api/admin/upgrade-requests', authenticateToken, isAdmin, AdminController.getUpgradeRequests);
     app.post('/api/admin/upgrade-requests/:requestId/approve', authenticateToken, isAdmin, AdminController.approveUpgradeRequest);

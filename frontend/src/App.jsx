@@ -24,6 +24,11 @@ import SessionExpiredModal from './components/common/SessionExpiredModal';
 import { useAuth } from './hooks/useAuth';
 import { useState, useEffect } from 'react';
 
+import AdminProductDetail from './pages/admin/AdminProductDetail';
+import AdminUserDetail from './pages/admin/AdminUserDetail';
+import AdminCategories from './pages/admin/AdminCategories';
+import AdminCategoryDetail from './pages/admin/AdminCategoryDetail';
+
 const AppContent = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/verify-otp';
@@ -89,7 +94,11 @@ const AppContent = () => {
           </ProtectedRoute>
         }>
           <Route path="edit/products" element={<AdminProducts />} />
+          <Route path="products/:id" element={<AdminProductDetail />} />
           <Route path="edit/users" element={<AdminUsers />} />
+          <Route path="users/:id" element={<AdminUserDetail />} />
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="categories/:id" element={<AdminCategoryDetail />} />
           <Route path="manage/upgraderequests" element={<AdminUpgradeRequests />} />
           <Route path="manage/settings" element={<AdminSettings />} />
         </Route>
