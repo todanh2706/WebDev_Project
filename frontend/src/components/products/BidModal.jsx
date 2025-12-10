@@ -46,11 +46,11 @@ const BidModal = ({ show, onHide, product, onSubmit, bidAmount, setBidAmount, pl
                     <div className="d-flex justify-content-end gap-2 pt-2">
                         <Button
                             onClick={onHide}
-                            className="btn-auction text-black fw-bold px-4 text-danger"
+                            className="px-4 rounded-pill d-flex align-items-center gap-2"
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" className="btn-auction text-black fw-bold px-4 text-success" disabled={placingBid}>
+                        <Button type="submit" className="px-4 rounded-pill d-flex align-items-center gap-2" disabled={placingBid}>
                             {placingBid ? <Spinner size="sm" animation="border" /> : 'Confirm Bid'}
                         </Button>
                     </div>

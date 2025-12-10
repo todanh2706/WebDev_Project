@@ -783,5 +783,67 @@ export default {
             console.error(error);
             res.status(500).json({ message: 'Error fetching product bids' });
         }
+    },
+
+    rejectBid: async (req, res) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const { productId, bidId } = req.params;
+            const userId = req.user.id; // Requester (Seller)
+
+            const product = await Products.findByPk(productId, { transaction: t });
+            if (!product) {
+                await t.rollback();
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            // Verify seller
+            if (product.seller_id !== userId) {
+                await t.rollback();
+                return res.status(403).json({ message: 'Only the seller can reject bids for this product' });
+            }
+
+            const bid = await Bid.findOne({
+                where: {
+                    bid_id: bidId,
+                    product_id: productId
+                },
+                transaction: t
+            });
+
+            if (!bid) {
+                await t.rollback();
+                return res.status(404).json({ message: 'Bid not found' });
+            }
+
+            // Delete the bid
+            await bid.destroy({ transaction: t });
+
+            // Recalculate product state
+            // Find the new highest bid
+            const highestBid = await Bid.findOne({
+                where: { product_id: productId },
+                order: [['amount', 'DESC']],
+                transaction: t
+            });
+
+            if (highestBid) {
+                product.current_price = highestBid.amount;
+                product.current_winner_id = highestBid.bidder_id;
+            } else {
+                // No bids left, reset to starting price
+                product.current_price = product.starting_price;
+                product.current_winner_id = null;
+            }
+
+            await product.save({ transaction: t });
+
+            await t.commit();
+            res.json({ message: 'Bid rejected successfully', product });
+        } catch (error) {
+            await t.rollback();
+            console.error('Error rejecting bid:', error);
+            res.status(500).json({ message: 'Error rejecting bid' });
+        }
     }
 };

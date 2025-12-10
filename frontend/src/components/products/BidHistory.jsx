@@ -4,7 +4,7 @@ import { productService } from '../../services/productService';
 import { formatDate } from '../../utils/formatters';
 import { FaHistory, FaUser, FaTag, FaCalendarAlt } from 'react-icons/fa';
 
-const BidHistory = ({ productId }) => {
+const BidHistory = ({ productId, isSeller, onRejectBid, refreshTrigger }) => {
     const [bids, setBids] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -23,7 +23,7 @@ const BidHistory = ({ productId }) => {
         if (productId) {
             fetchBids();
         }
-    }, [productId]);
+    }, [productId, refreshTrigger]);
 
     if (loading) {
         return (
@@ -70,6 +70,11 @@ const BidHistory = ({ productId }) => {
                                 <FaTag className="me-2" />
                                 Price
                             </th>
+                            {isSeller && (
+                                <th className="py-3 px-4 border-secondary border-opacity-25 text-auction-primary bg-transparent fw-bold text-end">
+                                    Actions
+                                </th>
+                            )}
                         </tr>
                     </thead>
                     <tbody>
@@ -84,6 +89,16 @@ const BidHistory = ({ productId }) => {
                                 <td className="py-3 px-4 table-transparent-cell text-white fw-bold text-end">
                                     ${parseFloat(bid.amount).toLocaleString()}
                                 </td>
+                                {isSeller && (
+                                    <td className="py-3 px-4 table-transparent-cell text-end">
+                                        <button
+                                            className="btn btn-sm btn-auction-warning rounded-pill px-3"
+                                            onClick={() => onRejectBid(bid.bid_id)}
+                                        >
+                                            Reject
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>

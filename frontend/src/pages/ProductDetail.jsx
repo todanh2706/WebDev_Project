@@ -12,6 +12,7 @@ import ProductInfo from '../components/products/ProductInfo';
 import BidModal from '../components/products/BidModal';
 import BidHistory from '../components/products/BidHistory';
 import CommentSection from '../components/products/CommentSection';
+import RejectBidModal from '../components/products/RejectBidModal';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -24,7 +25,11 @@ const ProductDetail = () => {
     const [userRatingScore, setUserRatingScore] = useState(null);
     const [isEligible, setIsEligible] = useState(true);
     const [permissionStatus, setPermissionStatus] = useState(null);
+
     const [placingBid, setPlacingBid] = useState(false);
+    const [showRejectModal, setShowRejectModal] = useState(false);
+    const [bidToReject, setBidToReject] = useState(null);
+    const [rejectingBid, setRejectingBid] = useState(false);
     const { showToast } = useToast();
     const { user } = useAuth();
 
@@ -102,6 +107,36 @@ const ProductDetail = () => {
         }
     };
 
+    const handleBidSuccess = (newAmount) => {
+        setProduct(prev => ({
+            ...prev,
+            current_price: newAmount,
+            current_winner_id: user.id
+        }));
+        showToast('Bid placed successfully!', 'success');
+    };
+
+    const handleRejectConfirm = async () => {
+        if (!bidToReject) return;
+
+        setRejectingBid(true);
+        try {
+            await productService.rejectBid(product.id, bidToReject);
+            showToast('Bid rejected successfully', 'success');
+
+            // Refresh product data
+            const updatedProduct = await productService.getProductById(id);
+            setProduct(updatedProduct);
+
+            setShowRejectModal(false);
+            setBidToReject(null);
+        } catch (error) {
+            showToast('Failed to reject bid', 'error');
+        } finally {
+            setRejectingBid(false);
+        }
+    };
+
     const handleBidSubmit = async (e) => {
         e.preventDefault();
         if (!bidAmount || isNaN(bidAmount) || parseFloat(bidAmount) <= parseFloat(product.current_price)) {
@@ -174,7 +209,15 @@ const ProductDetail = () => {
                         </div>
 
                         {/* Bid History Panel */}
-                        <BidHistory productId={product.id} />
+                        <BidHistory
+                            productId={product.id}
+                            isSeller={user && user.id === product.seller_id}
+                            onRejectBid={(bidId) => {
+                                setBidToReject(bidId);
+                                setShowRejectModal(true);
+                            }}
+                            refreshTrigger={product}
+                        />
                     </Col>
 
                     {/* Product Info & Bidding */}
@@ -221,6 +264,13 @@ const ProductDetail = () => {
                 bidAmount={bidAmount}
                 setBidAmount={setBidAmount}
                 placingBid={placingBid}
+            />
+
+            <RejectBidModal
+                show={showRejectModal}
+                onHide={() => setShowRejectModal(false)}
+                onConfirm={handleRejectConfirm}
+                loading={rejectingBid}
             />
         </div>
     );

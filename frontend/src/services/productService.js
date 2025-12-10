@@ -21,6 +21,11 @@ export const productService = {
         return response.data;
     },
 
+    rejectBid: async (productId, bidId) => {
+        const response = await api.delete(`/products/${productId}/bids/${bidId}`);
+        return response.data;
+    },
+
     searchProducts: async (query, page = 1, limit = 12, sort = 'default') => {
         const response = await api.get(`/products/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}&sort=${sort}`);
         return response.data;
