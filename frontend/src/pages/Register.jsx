@@ -40,7 +40,8 @@ export default function Register() {
             navigate('/verify-otp', { state: { email } });
         } catch (err) {
             // Error is handled by context but we also show toast
-            showToast(err.message || "Registration failed", "error");
+            const errorMessage = err.response?.data?.message || err.message || "Registration failed";
+            showToast(errorMessage, "error");
         }
     }
 

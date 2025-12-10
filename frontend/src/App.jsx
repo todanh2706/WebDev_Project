@@ -35,6 +35,11 @@ const AppContent = () => {
 
   useEffect(() => {
     const handleSessionExpired = () => {
+      // Don't show the modal if we're already on an auth page
+      const currentPath = window.location.pathname;
+      if (currentPath === '/login' || currentPath === '/register' || currentPath === '/verify-otp') {
+        return;
+      }
       setShowSessionExpiredModal(true);
     };
 
