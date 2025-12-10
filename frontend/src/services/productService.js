@@ -1,8 +1,8 @@
 import api from './api';
 
 export const productService = {
-    getAllProducts: async (page = 1, limit = 12) => {
-        const response = await api.get(`/products?page=${page}&limit=${limit}`);
+    getAllProducts: async (page = 1, limit = 12, sort = 'default') => {
+        const response = await api.get(`/products?page=${page}&limit=${limit}&sort=${sort}`);
         return response.data;
     },
 

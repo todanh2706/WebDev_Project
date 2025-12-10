@@ -17,7 +17,7 @@ const AllProducts = () => {
         const fetchProducts = async () => {
             setLoading(true);
             try {
-                const data = await productService.getAllProducts(currentPage, 12);
+                const data = await productService.getAllProducts(currentPage, 12, sortBy);
                 setProducts(data.products);
                 setTotalPages(data.totalPages);
             } catch (error) {
@@ -29,7 +29,7 @@ const AllProducts = () => {
         };
 
         fetchProducts();
-    }, [currentPage, showToast]);
+    }, [currentPage, sortBy, showToast]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);

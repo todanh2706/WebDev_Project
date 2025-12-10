@@ -212,6 +212,7 @@ const ProductDetail = () => {
                         <BidHistory
                             productId={product.id}
                             isSeller={user && user.id === product.seller_id}
+                            isAuctionActive={product.status === 'active'}
                             onRejectBid={(bidId) => {
                                 setBidToReject(bidId);
                                 setShowRejectModal(true);

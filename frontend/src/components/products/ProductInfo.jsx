@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from 'react-bootstrap';
 import Button from '../common/Button';
-import { FaTag, FaUser, FaShieldAlt, FaGavel } from 'react-icons/fa';
+import { FaTag, FaUser, FaShieldAlt, FaGavel, FaTrophy, FaClock } from 'react-icons/fa';
 
 const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequestPermission, isOwner }) => {
     if (!product) return null;
@@ -16,6 +16,16 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
                     <Badge bg="secondary" className="bg-opacity-50 px-3 py-2 rounded-pill">
                         <FaTag className="me-2" />
                         {product.category.name}
+                    </Badge>
+                )}
+                {product.status === 'sold' && (
+                    <Badge bg="success" className="px-3 py-2 rounded-pill fw-bold">
+                        SOLD
+                    </Badge>
+                )}
+                {product.status === 'expired' && (
+                    <Badge bg="danger" className="px-3 py-2 rounded-pill fw-bold">
+                        EXPIRED
                     </Badge>
                 )}
             </div>
@@ -35,7 +45,9 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
             <div className="p-4 rounded-4 bg-black bg-opacity-25 border border-white border-opacity-10 mb-4">
                 <div className="row g-4">
                     <div className="col-6">
-                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">Current Price</small>
+                        <small className="text-white-50 d-block mb-1 text-uppercase ls-1">
+                            {product.status === 'sold' ? 'Winning Price' : 'Current Price'}
+                        </small>
                         <span className="h2 text-auction-primary fw-bold mb-0">
                             ${parseFloat(product.current_price).toLocaleString()}
                         </span>
@@ -50,7 +62,23 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
             </div>
 
             <div className="d-grid gap-3">
-                {isOwner ? (
+                {product.status === 'sold' ? (
+                    <div className="p-4 rounded-4 bg-success bg-opacity-10 border border-success text-center">
+                        <FaTrophy className="text-warning mb-3" size={40} />
+                        <h4 className="text-white fw-bold mb-2">Auction Won!</h4>
+                        <p className="text-white-50 mb-0">
+                            Winner: <span className="text-white fw-bold">{product.current_winner?.name || 'Unknown'}</span>
+                        </p>
+                    </div>
+                ) : product.status === 'expired' ? (
+                    <div className="p-4 rounded-4 bg-danger bg-opacity-10 border border-danger text-center">
+                        <FaClock className="text-danger mb-3" size={40} />
+                        <h4 className="text-white fw-bold mb-2">Auction Expired</h4>
+                        <p className="text-white-50 mb-0">
+                            This auction has ended with no bids.
+                        </p>
+                    </div>
+                ) : isOwner ? (
                     <div className="p-3 rounded-4 bg-warning bg-opacity-10 border border-warning text-center">
                         <FaShieldAlt className="text-warning mb-2 fs-4" />
                         <h5 className="text-white fw-bold">You are the seller</h5>
