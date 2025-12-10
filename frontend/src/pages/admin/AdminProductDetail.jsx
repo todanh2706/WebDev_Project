@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Badge, Spinner } from 'react-bootstrap';
 import { productService } from '../../services/productService';
+import { adminService } from '../../services/adminService';
 import { useToast } from '../../contexts/ToastContext';
 import Button from '../../components/common/Button';
 import { FaArrowLeft, FaGavel, FaClock, FaTag, FaUser } from 'react-icons/fa';
@@ -43,13 +43,33 @@ const AdminProductDetail = () => {
         </div>
     );
 
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+            try {
+                await adminService.deleteProduct(product.id);
+                showToast('Product deleted successfully', 'success');
+                navigate('/admin/edit/products');
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                showToast("Failed to delete product", "error");
+            }
+        }
+    };
+
     return (
         <div className="animate-fade-in text-white">
-            <div className="d-flex align-items-center mb-4">
-                <Button variant="outline-light" className="me-3" onClick={() => navigate('/admin/edit/products')}>
-                    <FaArrowLeft />
-                </Button>
-                <h2 className="mb-0">Product Details</h2>
+            <div className="d-flex align-items-center justify-content-between mb-4">
+                <div className="d-flex align-items-center">
+                    <Button variant="outline-light" className="me-3" onClick={() => navigate('/admin/edit/products')}>
+                        <FaArrowLeft />
+                    </Button>
+                    <h2 className="mb-0">Product Details</h2>
+                </div>
+                <div className="d-flex gap-2">
+                    <Button variant="danger" onClick={handleDelete}>
+                        <FaGavel className="me-2" /> Delete Product
+                    </Button>
+                </div>
             </div>
 
             <Row>

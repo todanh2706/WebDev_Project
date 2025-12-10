@@ -56,5 +56,40 @@ export default {
             console.error("Error fetching category:", error);
             res.status(500).json({ error: "Internal Server Error" });
         }
+    },
+
+    update: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { name } = req.body;
+            const category = await Categories.findByPk(id);
+
+            if (!category) {
+                return res.status(404).json({ message: 'Category not found' });
+            }
+
+            category.name = name;
+            await category.save();
+            res.json({ message: 'Category updated successfully', category });
+        } catch (error) {
+            console.error("Error updating category:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    },
+
+    delete: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const category = await Categories.findByPk(id);
+
+            if (!category) {
+                return res.status(404).json({ message: 'Category not found' });
+            }
+            await category.destroy();
+            res.json({ message: 'Category deleted successfully' });
+        } catch (error) {
+            console.error("Error deleting category:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
 };

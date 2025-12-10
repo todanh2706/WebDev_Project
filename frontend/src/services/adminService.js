@@ -34,5 +34,20 @@ export const adminService = {
     deleteProduct: async (productId) => {
         const response = await api.delete(`/admin/products/${productId}`);
         return response.data;
+    },
+
+    updateUser: async (userId, data) => {
+        const response = await api.put(`/admin/users/${userId}`, data);
+        return response.data;
+    },
+
+    updateCategory: async (categoryId, data) => {
+        const response = await api.put(`/admin/categories/${categoryId}`, data);
+        return response.data;
+    },
+
+    deleteCategory: async (categoryId) => {
+        const response = await api.delete(`/admin/categories/${categoryId}`);
+        return response.data;
     }
 };

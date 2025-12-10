@@ -7,6 +7,7 @@ import { useToast } from '../../contexts/ToastContext';
 import Button from '../../components/common/Button';
 import { FaArrowLeft, FaUser, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGavel, FaBoxOpen } from 'react-icons/fa';
 import { formatDate, formatCurrency } from '../../utils/formatters';
+import EditUserModal from '../../components/admin/EditUserModal';
 
 const AdminUserDetail = () => {
     const { id } = useParams();
@@ -14,6 +15,7 @@ const AdminUserDetail = () => {
     const { showToast } = useToast();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -43,15 +45,54 @@ const AdminUserDetail = () => {
         </div>
     );
 
+
     const { user, stats } = data;
+
+
+    const handleDelete = async () => {
+        if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            try {
+                await adminService.deleteUser(user.id);
+                showToast('User deleted successfully', 'success');
+                navigate('/admin/edit/users');
+            } catch (error) {
+                console.error("Error deleting user:", error);
+                showToast(error.response?.data?.message || "Failed to delete user", "error");
+            }
+        }
+    };
+
+    const handleUpdate = async (userId, updateData) => {
+        try {
+            await adminService.updateUser(userId, updateData);
+            showToast('User updated successfully', 'success');
+            // Refresh data
+            const updatedResponse = await adminService.getUserDetails(id);
+            setData(updatedResponse);
+        } catch (error) {
+            console.error("Error updating user:", error);
+            showToast(error.response?.data?.message || "Failed to update user", "error");
+            throw error; // Re-throw to be caught by modal
+        }
+    };
 
     return (
         <div className="animate-fade-in text-white">
-            <div className="d-flex align-items-center mb-4">
-                <Button variant="outline-light" className="me-3" onClick={() => navigate('/admin/edit/users')}>
-                    <FaArrowLeft />
-                </Button>
-                <h2 className="mb-0">User Details</h2>
+            <div className="d-flex align-items-center justify-content-between mb-4">
+                <div className="d-flex align-items-center">
+                    <Button variant="outline-light" className="me-3" onClick={() => navigate('/admin/edit/users')}>
+                        <FaArrowLeft />
+                    </Button>
+                    <h2 className="mb-0">User Details</h2>
+                </div>
+                <div className="d-flex gap-2">
+                    <Button variant="warning" onClick={() => setShowEditModal(true)}>
+                        <FaGavel className="me-2" /> Edit User
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete}>
+                        <FaGavel className="me-2" /> Delete User
+                    </Button>
+                </div>
             </div>
 
             <Row>
@@ -62,8 +103,11 @@ const AdminUserDetail = () => {
                                 <FaUser size={40} className="text-black" />
                             </div>
                             <h3 className="text-white">{user.name}</h3>
-                            <Badge bg={user.role === 1 ? 'warning' : 'info'} text={user.role === 1 ? 'dark' : 'white'}>
-                                {user.role === 1 ? 'Seller' : 'Bidder'}
+                            <Badge bg={user.role === 1 ? 'warning' : 'info'} text={user.role === 1 ? 'dark' : 'white'} className="me-2">
+                                {user.role === 1 ? 'Seller' : user.role === 2 ? 'Admin' : 'Bidder'}
+                            </Badge>
+                            <Badge bg={user.status === 'active' ? 'success' : 'danger'}>
+                                {user.status.toUpperCase()}
                             </Badge>
                         </div>
 
@@ -94,13 +138,6 @@ const AdminUserDetail = () => {
                                 </div>
                             </div>
                         )}
-
-                        <div className="mb-3">
-                            <small className="text-white-50 d-block">Status</small>
-                            <Badge bg={user.status === 'active' ? 'success' : 'danger'}>
-                                {user.status.toUpperCase()}
-                            </Badge>
-                        </div>
 
                         <div className="mb-3">
                             <small className="text-white-50 d-block">Total Products</small>
@@ -198,6 +235,13 @@ const AdminUserDetail = () => {
 
                 </Col>
             </Row>
+
+            <EditUserModal
+                show={showEditModal}
+                onHide={() => setShowEditModal(false)}
+                user={user}
+                onSave={handleUpdate}
+            />
         </div>
     );
 };

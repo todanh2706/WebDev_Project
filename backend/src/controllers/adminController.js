@@ -147,17 +147,46 @@ export default {
     },
 
     deleteProduct: async (req, res) => {
+        const t = await db.sequelize.transaction();
         try {
             const { id } = req.params;
             const product = await Products.findByPk(id);
 
             if (!product) {
+                await t.rollback();
                 return res.status(404).json({ message: 'Product not found' });
             }
 
-            await product.destroy();
+            const { ProductsImage, Bid, Watchlist, BannedBidders, Feedbacks, ProductQuestions, BidPermissionRequest, Orders, Comment, ChatMessages } = db;
+
+            if (Orders) {
+                const orders = await Orders.findAll({ where: { product_id: id }, transaction: t });
+                if (orders.length > 0) {
+                    const orderIds = orders.map(o => o.order_id);
+                    // Delete chat messages for these orders
+                    if (ChatMessages) {
+                        await ChatMessages.destroy({ where: { order_id: orderIds }, transaction: t });
+                    }
+                    // Delete the orders
+                    await Orders.destroy({ where: { order_id: orderIds }, transaction: t });
+                }
+            }
+
+            if (Comment) await Comment.destroy({ where: { product_id: id }, transaction: t });
+
+            await ProductsImage.destroy({ where: { product_id: id }, transaction: t });
+            await Bid.destroy({ where: { product_id: id }, transaction: t });
+            if (Watchlist) await Watchlist.destroy({ where: { product_id: id }, transaction: t });
+            if (BannedBidders) await BannedBidders.destroy({ where: { product_id: id }, transaction: t });
+            if (Feedbacks) await Feedbacks.destroy({ where: { product_id: id }, transaction: t });
+            if (ProductQuestions) await ProductQuestions.destroy({ where: { product_id: id }, transaction: t });
+            if (BidPermissionRequest) await BidPermissionRequest.destroy({ where: { product_id: id }, transaction: t });
+
+            await product.destroy({ transaction: t });
+            await t.commit();
             res.json({ message: 'Product deleted successfully' });
         } catch (error) {
+            await t.rollback();
             console.error(error);
             res.status(500).json({ message: 'Error deleting product' });
         }
@@ -225,6 +254,32 @@ export default {
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error fetching user details' });
+        }
+    },
+
+    updateUser: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { role, status } = req.body;
+            const user = await Users.findByPk(id);
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            // Prevent updating self role/status to something locking
+            if (user.id === req.user.id) {
+                return res.status(400).json({ message: 'Cannot update your own sensitive fields' });
+            }
+
+            if (role !== undefined) user.role = role;
+            if (status !== undefined) user.status = status;
+
+            await user.save();
+            res.json({ message: 'User updated successfully', user });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error updating user' });
         }
     }
 };

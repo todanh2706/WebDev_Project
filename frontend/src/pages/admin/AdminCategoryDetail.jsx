@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Badge, Spinner, Table } from 'react-bootstrap';
 import { productService } from '../../services/productService';
+import { adminService } from '../../services/adminService';
 import { useToast } from '../../contexts/ToastContext';
 import Button from '../../components/common/Button';
 import { FaArrowLeft, FaFolder, FaTag } from 'react-icons/fa';
 import { formatDate, formatCurrency } from '../../utils/formatters';
+import EditCategoryModal from '../../components/admin/EditCategoryModal';
 
 const AdminCategoryDetail = () => {
     const { id } = useParams();
@@ -14,6 +16,7 @@ const AdminCategoryDetail = () => {
     const { showToast } = useToast();
     const [category, setCategory] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         const fetchCategory = async () => {
@@ -43,13 +46,54 @@ const AdminCategoryDetail = () => {
         </div>
     );
 
+
+
+    const handleDelete = async () => {
+        // Warning: This simplistic delete might fail if FK constraints exist.
+        if (window.confirm('Are you sure you want to delete this category? This might fail if products exist within it.')) {
+            try {
+                await adminService.deleteCategory(category.id);
+                showToast('Category deleted successfully', 'success');
+                navigate('/admin/categories');
+            } catch (error) {
+                console.error("Error deleting category:", error);
+                showToast(error.response?.data?.message || "Failed to delete category", "error");
+            }
+        }
+    };
+
+    const handleUpdate = async (categoryId, updateData) => {
+        try {
+            await adminService.updateCategory(categoryId, updateData);
+            showToast('Category updated successfully', 'success');
+            // Refresh
+            const updatedResponse = await productService.getCategoryById(id);
+            setCategory(updatedResponse);
+        } catch (error) {
+            console.error("Error updating category:", error);
+            showToast(error.response?.data?.message || "Failed to update category", "error");
+            throw error;
+        }
+    };
+
     return (
         <div className="animate-fade-in text-white">
-            <div className="d-flex align-items-center mb-4">
-                <Button variant="outline-light" className="me-3" onClick={() => navigate('/admin/categories')}>
-                    <FaArrowLeft />
-                </Button>
-                <h2 className="mb-0">Category Details</h2>
+            <div className="d-flex align-items-center justify-content-between mb-4">
+                <div className="d-flex align-items-center">
+                    <Button variant="outline-light" className="me-3" onClick={() => navigate('/admin/categories')}>
+                        <FaArrowLeft />
+                    </Button>
+                    <h2 className="mb-0">Category Details</h2>
+                </div>
+                {/* Admin Actions */}
+                <div className="d-flex gap-2">
+                    <Button variant="warning" onClick={() => setShowEditModal(true)}>
+                        <FaTag className="me-2" /> Edit Name
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete}>
+                        <FaTag className="me-2" /> Delete Category
+                    </Button>
+                </div>
             </div>
 
             <div className="glass-panel p-4 rounded mb-4">
@@ -117,6 +161,13 @@ const AdminCategoryDetail = () => {
                     </div>
                 </Col>
             </Row>
+
+            <EditCategoryModal
+                show={showEditModal}
+                onHide={() => setShowEditModal(false)}
+                category={category}
+                onSave={handleUpdate}
+            />
         </div>
     );
 };

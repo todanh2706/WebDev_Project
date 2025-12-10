@@ -60,11 +60,17 @@ export default (app) => {
     // Admin Routes
     app.get('/api/admin/users', authenticateToken, isAdmin, AdminController.getUsers);
     app.get('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.getUserDetails);
+    app.put('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.updateUser);
     app.delete('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.deleteUser);
+
     app.get('/api/admin/upgrade-requests', authenticateToken, isAdmin, AdminController.getUpgradeRequests);
     app.post('/api/admin/upgrade-requests/:requestId/approve', authenticateToken, isAdmin, AdminController.approveUpgradeRequest);
     app.post('/api/admin/upgrade-requests/:requestId/reject', authenticateToken, isAdmin, AdminController.rejectUpgradeRequest);
     app.delete('/api/admin/products/:id', authenticateToken, isAdmin, AdminController.deleteProduct);
+
+    // Category Admin Routes
+    app.put('/api/admin/categories/:id', authenticateToken, isAdmin, CategoryController.update);
+    app.delete('/api/admin/categories/:id', authenticateToken, isAdmin, CategoryController.delete);
 
     // System Settings Routes
     app.get('/api/admin/settings', authenticateToken, isAdmin, SystemController.getSettings);
