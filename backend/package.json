@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js "
+    "start": "node app.js",
+    "dev": "nodemon --legacy-watch app.js"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
-    "@babel/register": "^7.28.3"
+    "@babel/register": "^7.28.3",
+    "nodemon": "^3.1.0"
   }
 }

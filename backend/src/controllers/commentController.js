@@ -1,7 +1,9 @@
 import db from '../models/index.js';
+import { sendCommentNotification } from '../services/emailService.js';
 
 const Comment = db.Comment;
 const User = db.Users;
+const Product = db.Products;
 
 export default {
     getComments: async (req, res) => {
@@ -55,6 +57,37 @@ export default {
             });
 
             res.status(201).json(createdComment);
+
+            // Send email notification to seller
+            try {
+                // Fetch product with seller info
+                const product = await Product.findByPk(id, {
+                    include: [
+                        {
+                            model: User,
+                            as: 'seller',
+                            attributes: ['id', 'email', 'name']
+                        }
+                    ]
+                });
+
+                if (product && product.seller) {
+                    // Check if commenter is not the seller
+                    if (product.seller.id !== userId) {
+                        const commenterName = req.user.name || 'A user'; // Assuming req.user has name from auth middleware
+                        await sendCommentNotification(
+                            product.seller.email,
+                            product.seller.name,
+                            commenterName,
+                            product.name,
+                            content.trim()
+                        );
+                    }
+                }
+            } catch (emailError) {
+                // Don't block response if email fails
+                console.error('Failed to process email notification:', emailError);
+            }
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error adding comment' });
