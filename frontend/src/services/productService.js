@@ -103,5 +103,25 @@ export const productService = {
     addComment: async (id, content, parentId = null) => {
         const response = await api.post(`/products/${id}/comments`, { content, parent_id: parentId });
         return response.data;
+    },
+
+    cancelTransaction: async (id) => {
+        const response = await api.post(`/products/${id}/cancel-transaction`);
+        return response.data;
+    },
+
+    submitFeedback: async (feedbackData) => {
+        const response = await api.post('/feedbacks', feedbackData);
+        return response.data;
+    },
+
+    getBannedBidders: async (productId) => {
+        const response = await api.get(`/products/${productId}/banned-bidders`);
+        return response.data;
+    },
+
+    unbanBidder: async (productId, userId) => {
+        const response = await api.delete(`/products/${productId}/banned-bidders/${userId}`);
+        return response.data;
     }
 };

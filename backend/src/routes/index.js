@@ -29,6 +29,9 @@ export default (app) => {
     app.post('/api/products/:id/bid', authenticateToken, ProductController.placeBid);
     app.post('/api/products/:id/description', authenticateToken, isSeller, ProductController.appendDescription);
     app.delete('/api/products/:productId/bids/:bidId', authenticateToken, ProductController.rejectBid); // Seller reject bid
+    app.post('/api/products/:id/cancel-transaction', authenticateToken, ProductController.cancelTransaction); // Seller cancel transaction
+    app.get('/api/products/:id/banned-bidders', authenticateToken, ProductController.getBannedBidders);
+    app.delete('/api/products/:id/banned-bidders/:userId', authenticateToken, ProductController.unbanBidder);
     app.post('/api/products/:id/bid-request', authenticateToken, ProductController.requestBidPermission);
     app.get('/api/products/:id/bid-permission', authenticateToken, ProductController.checkBidPermission);
     app.get('/api/seller/bid-requests', authenticateToken, ProductController.getSellerBidRequests);

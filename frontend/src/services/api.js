@@ -23,9 +23,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            // Dispatch a custom event that App.jsx can listen to
-            window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        if (error.response) {
+            if (error.response.status === 401) {
+                window.dispatchEvent(new CustomEvent('auth:session-expired'));
+            }
+            else if (error.response.status === 403) {
+                const errorMessage = error.response.data?.message || "";
+                if (!errorMessage.includes("banned")) {
+                    window.dispatchEvent(new CustomEvent('auth:session-expired'));
+                }
+            }
         }
         return Promise.reject(error);
     }

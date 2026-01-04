@@ -46,8 +46,28 @@ export default {
                 }
             }
 
-            if (winnerId !== reviewer_id) {
-                return res.status(403).json({ message: 'Only the winner of the auction can assess the seller.' });
+            // Verify Permission:
+            // 1. Winner can rate Seller.
+            // 2. Seller can rate Winner.
+
+            let isAllowed = false;
+            let targetUserId = null;
+
+            if (winnerId === reviewer_id) {
+                // Winner rating Seller
+                isAllowed = true;
+                targetUserId = product.seller_id;
+            } else if (product.seller_id === reviewer_id) {
+                // Seller rating Winner
+                if (!winnerId) {
+                    return res.status(400).json({ message: 'No winner to rate.' });
+                }
+                isAllowed = true;
+                targetUserId = winnerId;
+            }
+
+            if (!isAllowed) {
+                return res.status(403).json({ message: 'You are not authorized to leave feedback for this transaction.' });
             }
 
             // Check if feedback already exists
@@ -66,7 +86,7 @@ export default {
             const feedback = await Feedbacks.create({
                 product_id,
                 reviewer_id,
-                target_user_id: product.seller_id,
+                target_user_id: targetUserId,
                 rating,
                 comment
             });

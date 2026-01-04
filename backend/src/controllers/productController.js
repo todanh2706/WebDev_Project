@@ -7,6 +7,7 @@ const SystemSettings = db.SystemSettings;
 
 const BidPermissionRequest = db.BidPermissionRequest;
 const Feedbacks = db.Feedbacks;
+const BannedBidders = db.BannedBidders;
 import fs from 'fs';
 
 export default {
@@ -405,6 +406,20 @@ export default {
             if (!product) {
                 await t.rollback();
                 return res.status(404).json({ message: 'Product not found' });
+            }
+
+            // Check if user is banned
+            const isBanned = await BannedBidders.findOne({
+                where: {
+                    user_id: userId,
+                    product_id: id
+                },
+                transaction: t
+            });
+
+            if (isBanned) {
+                await t.rollback();
+                return res.status(403).json({ message: 'You have been banned from bidding on this product.' });
             }
 
             if (product.seller_id === userId) {
@@ -816,6 +831,15 @@ export default {
                 return res.status(404).json({ message: 'Bid not found' });
             }
 
+            // Ban the user from future bids on this product
+            await BannedBidders.findOrCreate({
+                where: {
+                    user_id: bid.bidder_id,
+                    product_id: productId
+                },
+                transaction: t
+            });
+
             // Delete the bid
             await bid.destroy({ transaction: t });
 
@@ -844,6 +868,138 @@ export default {
             await t.rollback();
             console.error('Error rejecting bid:', error);
             res.status(500).json({ message: 'Error rejecting bid' });
+        }
+    },
+
+    cancelTransaction: async (req, res) => {
+        const t = await db.sequelize.transaction();
+        try {
+            const { id } = req.params;
+            const sellerId = req.user.id;
+
+            const product = await Products.findByPk(id, { transaction: t });
+
+            if (!product) {
+                await t.rollback();
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            if (product.seller_id !== sellerId) {
+                await t.rollback();
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+
+            if (!product.current_winner_id) {
+                await t.rollback();
+                return res.status(400).json({ message: 'This product does not have a winner to cancel.' });
+            }
+
+            const winnerId = product.current_winner_id;
+
+            // 1. Create Negative Feedback
+            // Check if feedback already exists to avoid duplicates (optional but good practice)
+            const existingFeedback = await Feedbacks.findOne({
+                where: {
+                    product_id: id,
+                    reviewer_id: sellerId,
+                    target_user_id: winnerId
+                },
+                transaction: t
+            });
+
+            if (!existingFeedback) {
+                await Feedbacks.create({
+                    product_id: id,
+                    reviewer_id: sellerId,
+                    target_user_id: winnerId,
+                    rating: 'bad',
+                    comment: 'Người thắng không thanh toán'
+                }, { transaction: t });
+            }
+
+            // 2. Remove Winner and Reset Status
+            // Logic: We are cancelling the result. The requirement says "cancel transaction".
+            // We should arguably also mark the user as 'banned' from this product if the auction is somehow reopened,
+            // but usually 'cancel transaction' happens after end_date.
+            // If we just remove the winner, the product status effectively becomes 'expired' without a winner (unsold).
+
+            product.current_winner_id = null;
+            // Ensure status is appropriate. If end_date is past, it's expired.
+            // If we wanted to re-open it, we'd need to extend end_date. 
+            // For now, let's keep it simple: just remove the winner. The product remains 'sold' or 'expired'?
+            // Usually 'status' is 'sold' if there is a winner. If we remove winner, status should be 'expired' (unsold).
+            product.status = 'expired';
+
+            await product.save({ transaction: t });
+
+            await t.commit();
+            res.json({ message: 'Transaction cancelled successfully. Negative feedback sent to winner.' });
+        } catch (error) {
+            await t.rollback();
+            console.error('Error cancelling transaction:', error);
+            res.status(500).json({ message: 'Error cancelling transaction' });
+        }
+    },
+
+    getBannedBidders: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+
+            const product = await Products.findByPk(id);
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            if (product.seller_id !== userId) {
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+
+            const bannedBidders = await BannedBidders.findAll({
+                where: { product_id: id },
+                include: [{
+                    model: db.Users,
+                    as: 'user', // Ensure association matches alias in index.js/models
+                    attributes: ['id', 'name', 'email']
+                }]
+            });
+
+            res.json(bannedBidders);
+        } catch (error) {
+            console.error('Error fetching banned bidders:', error);
+            res.status(500).json({ message: 'Error fetching banned bidders' });
+        }
+    },
+
+    unbanBidder: async (req, res) => {
+        try {
+            const { id, userId } = req.params;
+            const sellerId = req.user.id;
+
+            const product = await Products.findByPk(id);
+            if (!product) {
+                return res.status(404).json({ message: 'Product not found' });
+            }
+
+            if (product.seller_id !== sellerId) {
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+
+            const deleted = await BannedBidders.destroy({
+                where: {
+                    product_id: id,
+                    user_id: userId
+                }
+            });
+
+            if (deleted) {
+                res.json({ message: 'User unbanned successfully' });
+            } else {
+                res.status(404).json({ message: 'Banned record not found' });
+            }
+        } catch (error) {
+            console.error('Error unbanning bidder:', error);
+            res.status(500).json({ message: 'Error unbanning bidder' });
         }
     }
 };

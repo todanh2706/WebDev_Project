@@ -3,7 +3,7 @@ import { Modal, Form } from 'react-bootstrap';
 import { X, ThumbsUp, ThumbsDown } from 'lucide-react';
 import Button from '../common/Button';
 
-const FeedbackModal = ({ isOpen, onClose, onSubmit, productName, existingFeedback }) => {
+const FeedbackModal = ({ isOpen, onClose, onSubmit, productName, existingFeedback, title }) => {
     const [rating, setRating] = useState('good');
     const [comment, setComment] = useState('');
 
@@ -41,7 +41,7 @@ const FeedbackModal = ({ isOpen, onClose, onSubmit, productName, existingFeedbac
                     {/* Header */}
                     <div className="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
                         <h4 className="text-white fw-bold m-0 d-flex align-items-center gap-2">
-                            <span className="text-auction-primary">{existingFeedback ? 'Your Feedback' : 'Rate Seller'}</span>
+                            <span className="text-auction-primary">{existingFeedback ? 'Your Feedback' : (title || 'Rate Seller')}</span>
                         </h4>
                     </div>
 

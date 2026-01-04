@@ -1,9 +1,9 @@
 import React from 'react';
 import { Badge } from 'react-bootstrap';
 import Button from '../common/Button';
-import { FaTag, FaUser, FaShieldAlt, FaGavel, FaTrophy, FaClock } from 'react-icons/fa';
+import { FaTag, FaUser, FaShieldAlt, FaGavel, FaTrophy, FaClock, FaUserSlash } from 'react-icons/fa';
 
-const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequestPermission, isOwner }) => {
+const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequestPermission, isOwner, onShowBannedList }) => {
     if (!product) return null;
 
     return (
@@ -82,11 +82,17 @@ const ProductInfo = ({ product, onPlaceBid, isEligible, permissionStatus, onRequ
                     <div className="p-3 rounded-4 bg-warning bg-opacity-10 border border-warning text-center">
                         <FaShieldAlt className="text-warning mb-2 fs-4" />
                         <h5 className="text-white fw-bold">You are the seller</h5>
-                        <p className="text-white-50 mb-0 small">
+                        <p className="text-white-50 mb-3 small">
                             You cannot place bids on your own product.
                             <br />
                             Manage this product from "My Products".
                         </p>
+                        <Button
+                            className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm bg-danger border-danger"
+                            onClick={onShowBannedList}
+                        >
+                            <FaUserSlash /> Banned List
+                        </Button>
                     </div>
                 ) : isEligible || permissionStatus === 'approved' ? (
                     <Button

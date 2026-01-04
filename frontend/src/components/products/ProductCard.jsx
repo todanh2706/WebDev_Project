@@ -7,7 +7,7 @@ import { FaEye, FaClock, FaHeart, FaRegHeart, FaStar, FaUsersCog, FaPen } from '
 import { formatTimeLeft, maskName, formatDate, isNew } from '../../utils/formatters';
 import BidRequestModal from './BidRequestModal';
 
-const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner, onUpdateDescription }) => {
+const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner, onUpdateDescription, showAdminActions, onRateWinner, onCancelTransaction }) => {
     const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date, id } = product;
     const imageUrl = images && images.length > 0 ? images[0].image_url : 'https://placehold.co/600x400?text=No+Image';
 
@@ -176,6 +176,29 @@ const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner, onUpda
                                     }}
                                 >
                                     <FaStar /> Rate Seller
+                                </Button>
+                            </div>
+                        )}
+
+                        {showAdminActions && (
+                            <div className="mt-2 d-grid gap-2">
+                                <Button
+                                    className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm bg-success border-success"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onRateWinner(product);
+                                    }}
+                                >
+                                    <FaStar /> Rate Winner
+                                </Button>
+                                <Button
+                                    className="w-100 py-2 d-flex align-items-center justify-content-center gap-2 rounded-pill shadow-sm btn-sm bg-danger border-danger"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        onCancelTransaction(product);
+                                    }}
+                                >
+                                    <FaUsersCog /> Cancel Transaction
                                 </Button>
                             </div>
                         )}

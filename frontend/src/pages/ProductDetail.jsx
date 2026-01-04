@@ -13,6 +13,7 @@ import BidModal from '../components/products/BidModal';
 import BidHistory from '../components/products/BidHistory';
 import CommentSection from '../components/products/CommentSection';
 import RejectBidModal from '../components/products/RejectBidModal';
+import BannedListModal from '../components/products/BannedListModal';
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -30,6 +31,7 @@ const ProductDetail = () => {
     const [showRejectModal, setShowRejectModal] = useState(false);
     const [bidToReject, setBidToReject] = useState(null);
     const [rejectingBid, setRejectingBid] = useState(false);
+    const [showBannedListModal, setShowBannedListModal] = useState(false);
     const { showToast } = useToast();
     const { user } = useAuth();
 
@@ -230,6 +232,7 @@ const ProductDetail = () => {
                             permissionStatus={permissionStatus}
                             onRequestPermission={handleRequestPermission}
                             isOwner={user && user.id === product.seller_id}
+                            onShowBannedList={() => setShowBannedListModal(true)}
                         />
 
                         <div className="glass-panel p-4 rounded-4">
@@ -272,6 +275,12 @@ const ProductDetail = () => {
                 onHide={() => setShowRejectModal(false)}
                 onConfirm={handleRejectConfirm}
                 loading={rejectingBid}
+            />
+
+            <BannedListModal
+                show={showBannedListModal}
+                onHide={() => setShowBannedListModal(false)}
+                productId={product?.id}
             />
         </div>
     );
