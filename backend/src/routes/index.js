@@ -8,6 +8,7 @@ import AdminController from '../controllers/adminController.js';
 import SystemController from '../controllers/systemController.js';
 import CommentController from '../controllers/commentController.js';
 import upload from '../middleware/upload.js';
+import passport from '../config/passport.js';
 
 export default (app) => {
     app.post('/api/register', AuthController.register);
@@ -15,6 +16,40 @@ export default (app) => {
     app.post('/api/refresh', AuthController.refreshToken);
     app.post('/api/logout', AuthController.logout);
     app.post('/api/verify-otp', AuthController.verifyOTP);
+
+    // OAuth Routes
+    const safeAuth = (provider, options) => (req, res, next) => {
+        const strategyAvailable = passport._strategies && passport._strategies[provider];
+        if (!strategyAvailable) {
+            // If strategy check fails (passport._strategies might be internal)
+            // fallback to checking env vars which is the proxy for registration
+            if (provider === 'google' && !process.env.GOOGLE_CLIENT_ID)
+                return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=google_not_configured`);
+            if (provider === 'github' && !process.env.GITHUB_CLIENT_ID)
+                return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=github_not_configured`);
+        }
+
+        try {
+            passport.authenticate(provider, options)(req, res, next);
+        } catch (e) {
+            console.error(`Passport Auth Error (${provider}):`, e);
+            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_strategy_error`);
+        }
+    };
+
+    // Google Auth
+    app.get('/api/auth/google', safeAuth('google', { scope: ['profile', 'email'] }));
+    app.get('/api/auth/google/callback',
+        safeAuth('google', { failureRedirect: '/login?error=oauth_failed', session: false }),
+        AuthController.handleOAuthSuccess
+    );
+
+    // GitHub Auth
+    app.get('/api/auth/github', safeAuth('github', { scope: ['user:email'] }));
+    app.get('/api/auth/github/callback',
+        safeAuth('github', { failureRedirect: '/login?error=oauth_failed', session: false }),
+        AuthController.handleOAuthSuccess
+    );
 
     // Product Routes
     app.post('/api/products', authenticateToken, isSeller, upload.array('images', 10), ProductController.createProduct);

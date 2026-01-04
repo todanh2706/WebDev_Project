@@ -165,5 +165,47 @@ export default {
             console.log(e);
             return res.status(500).send({ message: 'Error logging out.' });
         }
+    },
+
+    async handleOAuthSuccess(req, res) {
+        try {
+            const user = req.user;
+            // Generate Tokens
+            const accessToken = jwt.sign(
+                { id: user.id, email: user.email, role: user.role },
+                process.env.JWT_SECRET || 'access_secret',
+                { expiresIn: '1d' }
+            );
+
+            const refreshToken = jwt.sign(
+                { id: user.id, email: user.email, role: user.role },
+                process.env.JWT_SECRET || 'refresh_secret',
+                { expiresIn: '7d' }
+            );
+
+            // Update last_login_at
+            const now = new Date();
+            const gmt7Time = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+            user.last_login_at = gmt7Time;
+            await user.save();
+
+            // Set Refresh Token as HttpOnly Cookie
+            res.cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            });
+
+            // Redirect to frontend with accessToken
+            // Note: In production, redirect to the actual frontend URL. 
+            // For now assuming localhost:5173
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            res.redirect(`${frontendUrl}/oauth-callback?token=${accessToken}`);
+
+        } catch (e) {
+            console.log(e);
+            res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=oauth_failed`);
+        }
     }
 }

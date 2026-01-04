@@ -6,6 +6,7 @@ import Register from './pages/Register';
 import OTPVerification from './pages/OTPVerification';
 import CategoryProducts from './pages/CategoryProducts';
 import ProductDetail from './pages/ProductDetail';
+import OAuthCallback from './pages/OAuthCallback';
 import { ToastProvider } from './contexts/ToastContext';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import TopNavBar from './components/layout/TopNavBar';
@@ -74,6 +75,7 @@ const AppContent = () => {
         <Route path="/login" element={<LogIn />} />
         <Route path="/register" element={<Register />} />
         <Route path="/verify-otp" element={<OTPVerification />} />
+        <Route path="/oauth-callback" element={<OAuthCallback />} />
         <Route path="/category/:id" element={<CategoryProducts />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/search" element={<SearchResults />} />

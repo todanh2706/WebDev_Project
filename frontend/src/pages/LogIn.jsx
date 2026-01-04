@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../contexts/ToastContext";
-import { FaEye, FaEyeSlash, FaGavel } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaGavel, FaGoogle, FaGithub } from "react-icons/fa";
 import Button from '../components/common/Button';
 
 
@@ -105,6 +105,29 @@ export default function LogIn() {
                             >
                                 Sign In
                             </Button>
+
+                            <div className="d-flex align-items-center my-1">
+                                <hr className="flex-grow-1 border-secondary" />
+                                <span className="px-3 text-white-50 small">OR</span>
+                                <hr className="flex-grow-1 border-secondary" />
+                            </div>
+
+                            <div className="d-grid gap-2">
+                                <a
+                                    href="http://localhost:8080/api/auth/google"
+                                    className="btn btn-light py-2 px-4 rounded-3 d-flex align-items-center justify-content-center gap-2"
+                                >
+                                    <FaGoogle className="text-danger" />
+                                    <span>Continue with Google</span>
+                                </a>
+                                <a
+                                    href="http://localhost:8080/api/auth/github"
+                                    className="btn btn-dark py-2 px-4 rounded-3 d-flex align-items-center justify-content-center gap-2 border border-secondary"
+                                >
+                                    <FaGithub className="text-white" />
+                                    <span>Continue with GitHub</span>
+                                </a>
+                            </div>
 
                             <div className="text-center mt-4 text-white-50">
                                 Don't have an account? <a href="\register" className="text-auction-primary text-decoration-none fw-bold">Register</a>

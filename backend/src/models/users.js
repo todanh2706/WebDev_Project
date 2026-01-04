@@ -101,6 +101,7 @@ export default (sequelize, DataTypes) => {
     phone: {
       type: DataTypes.STRING,
       unique: true,
+      allowNull: true
     },
     role: {
       type: DataTypes.INTEGER,
@@ -118,6 +119,14 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    auth_provider: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    auth_id: {
+      type: DataTypes.STRING,
+      allowNull: true
+    }
   }, {
     sequelize,
     modelName: 'Users',

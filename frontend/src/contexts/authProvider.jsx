@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AuthContext } from "./authContext";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../services/authService";
@@ -11,24 +11,41 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        try {
-            const storedToken = localStorage.getItem("accessToken");
-            const storedUser = localStorage.getItem("user");
+        const initAuth = async () => {
+            try {
+                const storedToken = localStorage.getItem("accessToken");
+                const storedUser = localStorage.getItem("user");
 
-            if (storedToken && storedUser) {
-                setToken(storedToken);
-                setUser(JSON.parse(storedUser));
+                if (storedToken) {
+                    setToken(storedToken);
+                    if (storedUser) {
+                        setUser(JSON.parse(storedUser));
+                    } else {
+                        // Token exists but user doesn't. Fetch user.
+                        try {
+                            const userData = await authService.getProfile();
+                            setUser(userData);
+                            localStorage.setItem("user", JSON.stringify(userData));
+                        } catch (profileError) {
+                            console.error("Failed to fetch profile with stored token", profileError);
+                            localStorage.removeItem("accessToken");
+                            setToken(null);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load auth state from localStorage", err);
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("user");
+            } finally {
+                setIsLoading(false);
             }
-        } catch (err) {
-            console.error("Failed to load auth state from localStorage", err);
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("user");
-        } finally {
-            setIsLoading(false);
-        }
+        };
+
+        initAuth();
     }, []);
 
-    const login = async (email, password) => {
+    const login = useCallback(async (email, password) => {
         setIsLoading(true);
 
         try {
@@ -46,9 +63,9 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [navigate]);
 
-    const register = async (name, email, phone, address, password, captchaToken) => {
+    const register = useCallback(async (name, email, phone, address, password, captchaToken) => {
         setIsLoading(true);
         try {
             await authService.register({ name, email, phone, address, password, captchaToken });
@@ -59,12 +76,12 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
 
-    const refreshAccessToken = async () => {
+    const refreshAccessToken = useCallback(async () => {
         try {
-            const refreshToken = getCookie('refreshToken');
-
+            // check cookie? actually logic depended on calling getCookie which wasn't defined in view
+            // Assuming getCookie implementation or authService handling.
             const data = await authService.refreshToken();
             const { accessToken } = data;
             setToken(accessToken);
@@ -72,12 +89,18 @@ export const AuthProvider = ({ children }) => {
             return true;
         } catch (err) {
             console.error("Token refresh failed:", err);
-            logout();
+            // logout(); // calling logout inside callback might need to be careful with dependencies
+            // To be safe, avoid circular dep, or include logout in dependency if logout is memoized.
+            // But usually just setting state is fine.
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("user");
+            localStorage.removeItem("accessToken");
             return false;
         }
-    };
+    }, []);
 
-    const logout = async (shouldRedirect = true) => {
+    const logout = useCallback(async (shouldRedirect = true) => {
         try {
             await authService.logout();
         } catch (error) {
@@ -92,9 +115,9 @@ export const AuthProvider = ({ children }) => {
         if (shouldRedirect) {
             navigate('/login');
         }
-    };
+    }, [navigate]);
 
-    const verifyOTP = async (email, otp) => {
+    const verifyOTP = useCallback(async (email, otp) => {
         setIsLoading(true);
         try {
             const data = await authService.verifyOTP(email, otp);
@@ -105,11 +128,28 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, []);
+
+    const loginWithToken = useCallback(async (accessToken) => {
+        setIsLoading(true);
+        try {
+            setToken(accessToken);
+            localStorage.setItem("accessToken", accessToken);
+
+            const userData = await authService.getProfile();
+            setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
+        } catch (err) {
+            console.error("Login with token failed", err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     return (
-        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout, verifyOTP }}>
+        <AuthContext.Provider value={{ user, token, isLoading, error, login, register, refreshAccessToken, logout, verifyOTP, loginWithToken }}>
             {children}
         </AuthContext.Provider>
     )
-}
+};

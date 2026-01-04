@@ -20,11 +20,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));
 
+import passport from './src/config/passport.js';
+app.use(passport.initialize());
+
 route(app);
 
 import { checkExpiredAuctions } from "./src/services/auctionService.js";
 
-db.sequelize.sync().then(() => {
+db.sequelize.sync({ alter: true }).then(() => {
     app.listen(port, () => {
         console.log(`Server is listening on port ${port}`);
 
