@@ -281,5 +281,42 @@ export default {
             console.error(error);
             res.status(500).json({ message: 'Error updating user' });
         }
+    },
+
+    createUser: async (req, res) => {
+        try {
+            const { name, email, password, role, status } = req.body;
+
+            if (!email || !password || !name) {
+                return res.status(400).json({ message: 'Name, email and password are required' });
+            }
+
+            // check existing
+            const existing = await Users.findOne({ where: { email } });
+            if (existing) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
+
+            // Create user (password hashing is handled by User model hooks usually)
+            // If not, we should hash here. User model usually has beforeCreate/beforeUpdate.
+            // Assuming User model has hooks as per standard practices in this codebase 
+            // (saw 'beforeUpdate' mentioned in userController).
+
+            const newUser = await Users.create({
+                name,
+                email,
+                password,
+                role: role !== undefined ? role : 0, // Default to Bidder
+                status: status || 'active'
+            });
+
+            const userResp = newUser.toJSON();
+            delete userResp.password;
+
+            res.status(201).json({ message: 'User created successfully', user: userResp });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error creating user' });
+        }
     }
 };

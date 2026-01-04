@@ -61,6 +61,7 @@ export default (app) => {
     app.post('/api/products/:id/comments', authenticateToken, CommentController.addComment);
 
     // Admin Routes
+    app.post('/api/admin/users', authenticateToken, isAdmin, AdminController.createUser);
     app.get('/api/admin/users', authenticateToken, isAdmin, AdminController.getUsers);
     app.get('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.getUserDetails);
     app.put('/api/admin/users/:id', authenticateToken, isAdmin, AdminController.updateUser);
@@ -72,6 +73,7 @@ export default (app) => {
     app.delete('/api/admin/products/:id', authenticateToken, isAdmin, AdminController.deleteProduct);
 
     // Category Admin Routes
+    app.post('/api/admin/categories', authenticateToken, isAdmin, CategoryController.create);
     app.put('/api/admin/categories/:id', authenticateToken, isAdmin, CategoryController.update);
     app.delete('/api/admin/categories/:id', authenticateToken, isAdmin, CategoryController.delete);
 

@@ -58,6 +58,20 @@ export default {
         }
     },
 
+    create: async (req, res) => {
+        try {
+            const { name } = req.body;
+            if (!name) {
+                return res.status(400).json({ message: 'Category name is required' });
+            }
+            const category = await Categories.create({ name });
+            res.status(201).json({ message: 'Category created successfully', category });
+        } catch (error) {
+            console.error("Error creating category:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    },
+
     update: async (req, res) => {
         try {
             const { id } = req.params;
@@ -85,6 +99,13 @@ export default {
             if (!category) {
                 return res.status(404).json({ message: 'Category not found' });
             }
+
+            // Check if category has products
+            const productCount = await Products.count({ where: { category_id: id } });
+            if (productCount > 0) {
+                return res.status(400).json({ message: 'Cannot delete category because it contains products.' });
+            }
+
             await category.destroy();
             res.json({ message: 'Category deleted successfully' });
         } catch (error) {
