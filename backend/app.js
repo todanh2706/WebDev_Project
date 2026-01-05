@@ -25,18 +25,13 @@ app.use(passport.initialize());
 
 route(app);
 
-import { checkExpiredAuctions } from "./src/services/auctionService.js";
+import { initAuctionCron } from "./src/services/auctionService.js";
 
 db.sequelize.sync({ alter: true }).then(() => {
     app.listen(port, () => {
         console.log(`Server is listening on port ${port}`);
 
-        // Schedule auction expiration check every minute
-        setInterval(() => {
-            checkExpiredAuctions();
-        }, 60000); // 60 seconds
-
-        // Run immediately on startup
-        checkExpiredAuctions();
+        // Schedule auction expiration check
+        initAuctionCron();
     });
 });

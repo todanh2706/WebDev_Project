@@ -55,3 +55,76 @@ export const sendCommentNotification = async (sellerEmail, sellerName, commenter
         console.error('Error sending comment notification email:', error);
     }
 };
+
+export const sendAuctionWonEmail = async (winnerEmail, winnerName, productName, price) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: winnerEmail,
+        subject: `Congratulations! You won: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #28a745;">You Won!</h2>
+                <p>Hello ${winnerName},</p>
+                <p>Congratulations! You have won the auction for <strong>${productName}</strong>.</p>
+                <p>Winning Bid: <strong>$${price.toLocaleString()}</strong></p>
+                <p>Please log in to your account to view the seller's contact information and arrange for payment/delivery.</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/won-products" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Won Products</a>
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Won email sent to ${winnerEmail}`);
+    } catch (error) {
+        console.error('Error sending won email:', error);
+    }
+};
+
+export const sendAuctionSoldEmail = async (sellerEmail, sellerName, productName, price, winnerName) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: sellerEmail,
+        subject: `Your product has been sold: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #28a745;">Auction Success!</h2>
+                <p>Hello ${sellerName},</p>
+                <p>Your product <strong>${productName}</strong> has been sold to <strong>${winnerName}</strong>.</p>
+                <p>Winning Bid: <strong>$${price.toLocaleString()}</strong></p>
+                <p>Please log in to view the winner's details.</p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Sold email sent to ${sellerEmail}`);
+    } catch (error) {
+        console.error('Error sending sold email:', error);
+    }
+};
+
+export const sendKickedNotification = async (email, productName) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: `Bid Rejected: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #dc3545;">Bid Rejected</h2>
+                <p>We regret to inform you that the seller has rejected your bid on <strong>${productName}</strong>.</p>
+                <p>You have been restricted from placing further bids on this item.</p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Kick email sent to ${email}`);
+    } catch (error) {
+        console.error('Error sending kicked email:', error);
+    }
+};

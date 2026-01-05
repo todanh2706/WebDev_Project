@@ -8,6 +8,7 @@ const SystemSettings = db.SystemSettings;
 const BidPermissionRequest = db.BidPermissionRequest;
 const Feedbacks = db.Feedbacks;
 const BannedBidders = db.BannedBidders;
+import { sendKickedNotification } from '../services/emailService.js';
 import fs from 'fs';
 
 export default {
@@ -398,7 +399,7 @@ export default {
         const t = await db.sequelize.transaction();
         try {
             const { id } = req.params;
-            const { amount } = req.body;
+            const { amount } = req.body; // This is the User's Bid
             const userId = req.user.id;
 
             const product = await Products.findByPk(id, { lock: true, transaction: t });
@@ -408,12 +409,8 @@ export default {
                 return res.status(404).json({ message: 'Product not found' });
             }
 
-            // Check if user is banned
             const isBanned = await BannedBidders.findOne({
-                where: {
-                    user_id: userId,
-                    product_id: id
-                },
+                where: { user_id: userId, product_id: id },
                 transaction: t
             });
 
@@ -432,110 +429,184 @@ export default {
                 return res.status(400).json({ message: 'Auction has ended' });
             }
 
-            const minBidAmount = parseFloat(product.current_price) + parseFloat(product.step_price);
-            if (parseFloat(amount) < minBidAmount) {
-                await t.rollback();
-                return res.status(400).json({ message: `Bid amount must be at least $${minBidAmount.toLocaleString()} (Current Price + Step Price)` });
-            }
-
-            // Check eligibility
+            // Eligibility Check
             const ratings = await Feedbacks.findAll({ where: { target_user_id: userId } });
             const totalRatings = ratings.length;
             const goodRatings = ratings.filter(r => r.rating === 'good').length;
             const score = totalRatings > 0 ? (goodRatings / totalRatings) * 100 : 100;
-
-            // Must have >= 5 ratings and >= 80% score.
-            // If not, must have approved permission request.
             let isEligible = totalRatings >= 5 && score >= 80;
 
             if (!isEligible) {
                 const permission = await BidPermissionRequest.findOne({
-                    where: {
-                        user_id: userId,
-                        product_id: id,
-                        status: 'approved'
-                    }
+                    where: { user_id: userId, product_id: id, status: 'approved' }
                 });
 
                 if (!permission) {
                     await t.rollback();
-                    return res.status(403).json({
-                        message: 'You are not eligible to bid on this product. Please request permission from the seller.',
-                        requiresPermission: true
-                    });
-                }
-
-                // Check expiration (7 days)
-                const sevenDaysAgo = new Date();
-                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                if (new Date(permission.createdAt) < sevenDaysAgo) {
-                    await t.rollback();
-                    return res.status(403).json({
-                        message: 'Your bid permission has expired (7 days limit). Please request permission again.',
-                        requiresPermission: true,
-                        status: 'expired'
-                    });
+                    return res.status(403).json({ message: 'Not eligible (Score < 80% or < 5 ratings). Request permission.', requiresPermission: true });
                 }
             }
 
-            // Create bid
-            await Bid.create({
-                bidder_id: userId,
-                product_id: id,
-                amount: amount,
-                max_bid_amount: amount,
-                bid_time: new Date()
-            }, { transaction: t });
+            let biddingMode = 'AUTO';
+            const setting = await SystemSettings.findOne({ where: { key: 'BIDDING_MODE' } });
+            if (setting) {
+                biddingMode = setting.value;
+            }
+
+            const stepPrice = parseFloat(product.step_price);
+            const currentPrice = parseFloat(product.current_price);
+            const userBidAmount = parseFloat(amount);
+
+            const existingBidsCount = await Bid.count({ where: { product_id: id }, transaction: t });
+
+            let minValidBid = currentPrice + stepPrice;
+            if (existingBidsCount === 0) {
+                minValidBid = parseFloat(product.starting_price);
+            }
+
+            if (userBidAmount < minValidBid) {
+                await t.rollback();
+                return res.status(400).json({ message: `Bid must be at least $${minValidBid.toLocaleString('vi-VN')}` });
+            }
+
+            let newCurrentPrice = currentPrice;
+            let newWinnerId = product.current_winner_id;
+
+            if (biddingMode === 'NORMAL') {
+                newCurrentPrice = userBidAmount;
+                newWinnerId = userId;
+
+                await Bid.create({
+                    bidder_id: userId,
+                    product_id: id,
+                    amount: userBidAmount,
+                    max_bid_amount: userBidAmount,
+                    bid_time: new Date()
+                }, { transaction: t });
+
+            } else {
+                // AUTO BIDDING LOGIC
+                const allBids = await Bid.findAll({
+                    where: { product_id: id },
+                    order: [['max_bid_amount', 'DESC'], ['bid_time', 'ASC']],
+                    transaction: t
+                });
+
+                const userMaxBids = {};
+                allBids.forEach(bid => {
+                    const bAmt = parseFloat(bid.max_bid_amount);
+                    if (!userMaxBids[bid.bidder_id] || bAmt > userMaxBids[bid.bidder_id].amount) {
+                        userMaxBids[bid.bidder_id] = { amount: bAmt, time: bid.bid_time };
+                    }
+                });
+
+                // Add or Upate Current User
+                userMaxBids[userId] = { amount: userBidAmount, time: new Date() };
+
+                const sortedBidders = Object.keys(userMaxBids).map(uid => ({
+                    userId: parseInt(uid),
+                    amount: userMaxBids[uid].amount,
+                    time: userMaxBids[uid].time
+                })).sort((a, b) => {
+                    if (b.amount !== a.amount) return b.amount - a.amount;
+                    return new Date(a.time) - new Date(b.time);
+                });
+
+                const winner = sortedBidders[0];
+                const runnerUp = sortedBidders[1];
+
+                newWinnerId = winner.userId;
+
+                if (!runnerUp) {
+                    // Solo Bidder
+                    if (existingBidsCount === 0) {
+                        newCurrentPrice = parseFloat(product.starting_price);
+                    } else {
+                        newCurrentPrice = currentPrice;
+                    }
+
+                    // Record Bid
+                    await Bid.create({
+                        bidder_id: userId,
+                        product_id: id,
+                        amount: newCurrentPrice,
+                        max_bid_amount: userBidAmount,
+                        bid_time: new Date()
+                    }, { transaction: t });
+
+                } else {
+                    // Competition
+                    // Price is ALWAYS RunnerUp + Step (Capped at Winner Max)
+                    newCurrentPrice = runnerUp.amount + stepPrice;
+
+                    if (newCurrentPrice > winner.amount) {
+                        newCurrentPrice = winner.amount;
+                    }
+
+                    // Logic for Recording Bids
+                    if (newWinnerId === userId) {
+                        // User Won (Overtake or First/Solo)
+                        // Record User's Bid at Calculated Price
+                        await Bid.create({
+                            bidder_id: userId,
+                            product_id: id,
+                            amount: newCurrentPrice,
+                            max_bid_amount: userBidAmount,
+                            bid_time: new Date()
+                        }, { transaction: t });
+                    } else {
+                        // User Lost (Defense triggered)
+                        // 1. Record User's Bid at their Max (since they were pushed to limit)
+                        // Or should it be RunnerUp Amount?
+                        // If I bid 1600, and price goes to 1650.
+                        // My bid at 1600 should be visible.
+                        await Bid.create({
+                            bidder_id: userId,
+                            product_id: id,
+                            amount: userBidAmount, // They bid 1600, they essentially offered 1600
+                            max_bid_amount: userBidAmount,
+                            bid_time: new Date()
+                        }, { transaction: t });
+
+                        // 2. Record Auto-Bid for Winner
+                        await Bid.create({
+                            bidder_id: winner.userId,
+                            product_id: id,
+                            amount: newCurrentPrice, // 1650
+                            max_bid_amount: winner.amount, // 2000
+                            bid_time: new Date() // Technically slight delay but essentially same transaction
+                        }, { transaction: t });
+                    }
+                }
+            }
 
             // Auto-extension logic
             let newEndDate = null;
             if (product.is_auto_extend) {
-                const settings = await SystemSettings.findAll({ transaction: t });
-                const settingsMap = {};
-                settings.forEach(s => settingsMap[s.key] = s.value);
-
-                const thresholdMinutes = parseInt(settingsMap['auction_threshold_minutes'] || '5');
-                const extensionMinutes = parseInt(settingsMap['auction_extension_minutes'] || '10');
-
                 const now = new Date();
                 const endDate = new Date(product.end_date);
-                const timeRemainingMillis = endDate.getTime() - now.getTime();
-                const thresholdMillis = thresholdMinutes * 60 * 1000;
-
-                console.log('***** Auto Extension Debug *****');
-                console.log('Product ID:', product.id);
-                console.log('Is Auto Extend:', product.is_auto_extend);
-                console.log('Now:', now.toISOString());
-                console.log('End Date:', endDate.toISOString());
-                console.log('Time Remaining (ms):', timeRemainingMillis);
-                console.log('Threshold (ms):', thresholdMillis);
-                console.log('Settings:', settingsMap);
-
-                if (timeRemainingMillis > 0 && timeRemainingMillis <= thresholdMillis) {
-                    newEndDate = new Date(endDate.getTime() + (extensionMinutes * 60 * 1000));
-                    console.log('***** EXTENDING AUCTION to:', newEndDate.toISOString());
-                } else {
-                    console.log('***** Condition NOT met for extension.');
+                if ((endDate.getTime() - now.getTime()) <= 5 * 60 * 1000) {
+                    newEndDate = new Date(endDate.getTime() + 10 * 60 * 1000);
                 }
-            } else {
-                console.log('***** Auto Extension Debug: Product is NOT auto-extend *****');
             }
 
-            // Update product
+            // Update Product
             const updateData = {
-                current_price: amount,
-                current_winner_id: userId,
-                buy_now_price: null // Remove Buy Now option once a bid is placed
+                current_winner_id: newWinnerId,
+                current_price: newCurrentPrice,
+                buy_now_price: null
             };
-
-            if (newEndDate) {
-                updateData.end_date = newEndDate;
-            }
+            if (newEndDate) updateData.end_date = newEndDate;
 
             await product.update(updateData, { transaction: t });
 
             await t.commit();
-            res.json({ message: 'Bid placed successfully' });
+
+            if (biddingMode === 'AUTO' && newWinnerId !== userId) {
+                return res.json({ message: 'Bid placed, but you were outbidded by an automatic bid!', outbidded: true, current_price: newCurrentPrice });
+            }
+
+            res.json({ message: 'Bid placed successfully', current_price: newCurrentPrice });
         } catch (error) {
             await t.rollback();
             console.error(error);
@@ -823,7 +894,12 @@ export default {
                     bid_id: bidId,
                     product_id: productId
                 },
-                transaction: t
+                transaction: t,
+                include: [{
+                    model: db.Users,
+                    as: 'bidder',
+                    attributes: ['id', 'name', 'email']
+                }]
             });
 
             if (!bid) {
@@ -839,6 +915,11 @@ export default {
                 },
                 transaction: t
             });
+
+            // Send notification
+            if (bid.bidder && bid.bidder.email) {
+                await sendKickedNotification(bid.bidder.email, product.name);
+            }
 
             // Delete the bid
             await bid.destroy({ transaction: t });
