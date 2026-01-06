@@ -54,6 +54,59 @@ body {
     transform: translateY(-2px);
 }
 
+/* Rank Badges */
+.rank-badge {
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #ffd700 0%, #fdb931 100%);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+    color: #000;
+    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.3);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #cd7f32 0%, #a0522d 100%);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.3);
+}
+
+.rank-other {
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Custom Auction Buttons */
+.btn-auction-active-yellow {
+    background-color: var(--auction-primary) !important;
+    color: black !important;
+    border: 2px solid var(--auction-primary) !important;
+    font-weight: 600;
+}
+
+.btn-auction-inactive-yellow {
+    background-color: transparent !important;
+    color: var(--auction-dark) !important;
+    border: 2px solid var(--auction-dark) !important;
+    font-weight: bold;
+}
+
+.btn-auction-inactive-yellow:hover {
+    background-color: rgba(184, 134, 11, 0.1) !important;
+    color: var(--auction-primary) !important;
+    border-color: var(--auction-primary) !important;
+}
+
 .glass-panel {
     background: rgba(30, 30, 30, 0.7);
     backdrop-filter: blur(10px);

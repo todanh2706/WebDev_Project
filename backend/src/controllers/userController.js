@@ -170,7 +170,29 @@ export default {
                 }]
             });
 
-            res.json(products);
+            // Calculate rank for each product
+            const productsWithRank = await Promise.all(products.map(async (product) => {
+                const productJSON = product.toJSON();
+
+                // Get all unique bidders for this product and their max bid
+                const bidders = await Bid.findAll({
+                    where: { product_id: product.id },
+                    attributes: [
+                        'bidder_id',
+                        [db.sequelize.fn('MAX', db.sequelize.col('max_bid_amount')), 'max_bid']
+                    ],
+                    group: ['bidder_id'],
+                    order: [[db.sequelize.fn('MAX', db.sequelize.col('max_bid_amount')), 'DESC']]
+                });
+
+                // Find rank of current user
+                const rank = bidders.findIndex(b => b.bidder_id === req.user.id) + 1;
+                productJSON.user_rank = rank;
+
+                return productJSON;
+            }));
+
+            res.json(productsWithRank);
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error fetching participating auctions' });

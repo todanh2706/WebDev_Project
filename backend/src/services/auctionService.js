@@ -15,6 +15,9 @@ export const initAuctionCron = () => {
             const now = new Date();
 
             // Find products that have ended but are still 'active'
+            // Find products that have ended but are still 'active'
+            // NOTE: We avoid complex includes with 'limit' here because Sequelize generates a UNION query 
+            // which allows 'FOR UPDATE' only in specific Postgres versions/configurations, often failing.
             const products = await Products.findAll({
                 where: {
                     end_date: {
@@ -24,26 +27,13 @@ export const initAuctionCron = () => {
                 },
                 include: [
                     {
-                        model: Bid,
-                        as: 'bids',
-                        include: [
-                            {
-                                model: Users,
-                                as: 'bidder',
-                                required: true
-                            }
-                        ],
-                        order: [['amount', 'DESC']],
-                        limit: 1
-                    },
-                    {
                         model: Users,
                         as: 'seller',
                         required: true
                     }
                 ],
                 transaction: t,
-                lock: true
+                lock: true // Lock the product rows
             });
 
             if (products.length > 0) {
@@ -51,10 +41,18 @@ export const initAuctionCron = () => {
             }
 
             for (const product of products) {
-                if (product.bids && product.bids.length > 0) {
+                // Fetch the winning bid manually to avoid the UNION/LOCK issue
+                const winningBid = await Bid.findOne({
+                    where: { product_id: product.id },
+                    include: [{ model: Users, as: 'bidder', required: true }],
+                    order: [['amount', 'DESC']],
+                    transaction: t
+                });
+
+                if (winningBid) {
                     // Has winner
-                    const winningBid = product.bids[0];
                     const winner = winningBid.bidder;
+
 
                     product.current_winner_id = winner.id;
                     product.status = 'sold';
@@ -64,7 +62,7 @@ export const initAuctionCron = () => {
 
                     // Send Emails
                     if (winner) {
-                        await sendAuctionWonEmail(winner.email, winner.name, product.name, product.current_price);
+                        await sendAuctionWonEmail(winner.email, winner.name, product.name, product.current_price, product.id);
                     }
                     if (product.seller) {
                         await sendAuctionSoldEmail(product.seller.email, product.seller.name, product.name, product.current_price, winner ? winner.name : 'Unknown');

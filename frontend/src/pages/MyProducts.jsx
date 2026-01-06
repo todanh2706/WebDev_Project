@@ -135,13 +135,13 @@ const MyProducts = () => {
                 {/* Tabs */}
                 <div className="d-flex gap-3 mb-4">
                     <button
-                        className={`btn rounded-pill px-4 fw-bold ${activeTab === 'active' ? 'btn-auction-primary' : 'btn-outline-secondary text-white-50'}`}
+                        className={`btn rounded-pill px-4 ${activeTab === 'active' ? 'btn-auction-active-yellow' : 'btn-auction-inactive-yellow'}`}
                         onClick={() => setActiveTab('active')}
                     >
                         Active Auctions
                     </button>
                     <button
-                        className={`btn rounded-pill px-4 fw-bold ${activeTab === 'sold' ? 'btn-auction-primary' : 'btn-outline-secondary text-white-50'}`}
+                        className={`btn rounded-pill px-4 ${activeTab === 'sold' ? 'btn-auction-active-yellow' : 'btn-auction-inactive-yellow'}`}
                         onClick={() => setActiveTab('sold')}
                     >
                         Sold / Expired

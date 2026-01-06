@@ -67,15 +67,10 @@ export default function Home() {
                                 Bid on luxury watches, vintage cars, fine art, and more.
                             </p>
                             <div className="d-flex justify-content-center gap-3">
-                                <Link to="/auctions" className="text-decoration-none">
+                                <Link to="/products" className="text-decoration-none">
                                     <Button className="px-5 py-3 rounded-pill fw-bold">
                                         Start Bidding
                                     </Button>
-                                </Link>
-                                <Link to="/about" className="text-decoration-none">
-                                    <button className="btn btn-outline-light px-5 py-3 rounded-pill fw-bold">
-                                        Learn More
-                                    </button>
                                 </Link>
                             </div>
 

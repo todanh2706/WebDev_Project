@@ -14,6 +14,7 @@ import SearchResults from './pages/SearchResults';
 import AllProducts from './pages/AllProducts';
 import MyProducts from './pages/MyProducts';
 import Profile from './pages/Profile';
+import OrderCompletion from './pages/OrderCompletion';
 import AdminLayout from './components/layout/AdminLayout';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminUsers from './pages/admin/AdminUsers';
@@ -88,6 +89,11 @@ const AppContent = () => {
         <Route path="/my-products" element={
           <ProtectedRoute>
             <MyProducts />
+          </ProtectedRoute>
+        } />
+        <Route path="/order-completion/:productId" element={
+          <ProtectedRoute>
+            <OrderCompletion />
           </ProtectedRoute>
         } />
         <Route path="/admin" element={

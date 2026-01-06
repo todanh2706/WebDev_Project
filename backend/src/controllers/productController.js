@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-import { sendKickedNotification, sendBidSuccessEmail, sendOutbidEmail, sendNewBidEmail } from '../services/emailService.js';
+import { sendKickedNotification, sendBidSuccessEmail, sendOutbidEmail, sendNewBidEmail, sendProductUpdateEmail } from '../services/emailService.js';
 import fs from 'fs';
 
 const Products = db.Products;
@@ -607,14 +607,19 @@ export default {
             // --- Send Emails ---
             try {
                 // 1. Success Email to Bidder
-                const bidderEmail = req.user.email || 'user@example.com'; // Fallback if not in req.user, though auth usually provides it
-                const bidderName = req.user.name || 'Bidder';
+                // Fetch user details to ensure we have the name (req.user from JWT might not have it)
+                const currentUser = await db.Users.findByPk(userId);
+                const bidderName = currentUser ? currentUser.name : (req.user.name || 'Bidder');
+                const bidderEmail = currentUser ? currentUser.email : (req.user.email || 'user@example.com');
+
                 await sendBidSuccessEmail(bidderEmail, bidderName, product.name, userBidAmount);
 
                 // 2. New Bid Email to Seller
                 const seller = product.seller;
                 if (seller) {
-                    await sendNewBidEmail(seller.email, seller.name, product.name, userBidAmount, bidderName);
+                    // Use newCurrentPrice which represents the actual current price shown on the product
+                    // instead of userBidAmount (which is the hidden max bid)
+                    await sendNewBidEmail(seller.email, seller.name, product.name, newCurrentPrice, bidderName);
                 }
 
                 // 3. Outbid Email to Previous Winner
@@ -622,7 +627,7 @@ export default {
                     // Fetch previous winner email
                     const prevWinner = await db.Users.findByPk(previousWinnerId);
                     if (prevWinner) {
-                        await sendOutbidEmail(prevWinner.email, prevWinner.name, product.name, newCurrentPrice);
+                        await sendOutbidEmail(prevWinner.email, prevWinner.name, product.name, newCurrentPrice, product.id);
                     }
                 }
             } catch (emailErr) {
@@ -851,6 +856,35 @@ export default {
             const newDescription = (product.description || '') + appendText;
 
             await product.update({ description: newDescription });
+
+            // Notify all bidders
+            try {
+                const bids = await Bid.findAll({
+                    where: { product_id: id },
+                    include: [{
+                        model: db.Users,
+                        as: 'bidder',
+                        attributes: ['id', 'name', 'email']
+                    }]
+                });
+
+                // Deduplicate emails in JS to avoid SQL GROUP BY issues
+                const notifiedEmails = new Set();
+                const emailPromises = [];
+
+                for (const bid of bids) {
+                    if (bid.bidder && bid.bidder.email && !notifiedEmails.has(bid.bidder.email)) {
+                        notifiedEmails.add(bid.bidder.email);
+                        // Push promise to array
+                        emailPromises.push(sendProductUpdateEmail(bid.bidder.email, bid.bidder.name, product.name, appendText, id));
+                    }
+                }
+
+                await Promise.all(emailPromises);
+            } catch (notifyError) {
+                console.error('Error notifying bidders about update:', notifyError);
+                // Don't fail the request if email fails, just log it
+            }
 
             res.json({ message: 'Description updated successfully', description: newDescription });
         } catch (error) {

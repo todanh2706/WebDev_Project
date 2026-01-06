@@ -3,6 +3,7 @@ import ProductController from '../controllers/productController.js'
 import CategoryController from '../controllers/categoryController.js'; // Added import for CategoryController
 import UserController from '../controllers/userController.js';
 import FeedbackController from '../controllers/feedbackController.js';
+import OrderController from '../controllers/orderController.js';
 import { authenticateToken, isAdmin, isSeller } from '../middleware/authMiddleware.js';
 import AdminController from '../controllers/adminController.js';
 import SystemController from '../controllers/systemController.js';
@@ -88,8 +89,15 @@ export default (app) => {
     app.get('/api/user/upgrade-request', authenticateToken, UserController.getUpgradeRequest);
     app.get('/api/user/my-products', authenticateToken, ProductController.getMyProducts);
 
+    // Order & Chat Routes
+    app.get('/api/orders/product/:productId', authenticateToken, OrderController.getOrderByProduct);
+    app.put('/api/orders/:orderId', authenticateToken, OrderController.updateOrderStep);
+    app.get('/api/orders/:orderId/messages', authenticateToken, OrderController.getMessages);
+    app.post('/api/orders/:orderId/messages', authenticateToken, OrderController.sendMessage);
+
     // Feedback Routes
     app.post('/api/feedbacks', authenticateToken, FeedbackController.create);
+    app.put('/api/feedbacks/:feedbackId', authenticateToken, FeedbackController.update);
 
     // Comment Routes
     app.get('/api/products/:id/comments', CommentController.getComments);

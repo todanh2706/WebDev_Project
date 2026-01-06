@@ -32,6 +32,18 @@ export default (sequelize, DataTypes) => {
         status: {
             type: DataTypes.ENUM('pending', 'paid', 'shipped', 'completed', 'cancelled'),
             defaultValue: 'pending'
+        },
+        shipping_address: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
+        payment_receipt: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        shipping_receipt: {
+            type: DataTypes.STRING,
+            allowNull: true
         }
     });
 

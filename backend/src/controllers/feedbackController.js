@@ -97,5 +97,34 @@ export default {
             console.error('Error creating feedback:', error);
             res.status(500).json({ message: 'Internal server error.' });
         }
+    },
+
+    update: async (req, res) => {
+        try {
+            const { feedbackId } = req.params;
+            const { rating, comment } = req.body;
+            const userId = req.user.id;
+
+            const feedback = await Feedbacks.findByPk(feedbackId);
+            if (!feedback) {
+                return res.status(404).json({ message: 'Feedback not found.' });
+            }
+
+            if (feedback.reviewer_id !== userId) {
+                return res.status(403).json({ message: 'Unauthorized to edit this feedback.' });
+            }
+
+            if (!['good', 'bad'].includes(rating)) {
+                return res.status(400).json({ message: 'Rating must be either "good" or "bad".' });
+            }
+
+            await feedback.update({ rating, comment });
+            res.json({ message: 'Feedback updated successfully.', feedback });
+
+        } catch (error) {
+            console.error('Error updating feedback:', error);
+            res.status(500).json({ message: 'Internal server error.' });
+        }
     }
+
 };

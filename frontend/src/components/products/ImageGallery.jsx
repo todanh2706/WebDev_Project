@@ -16,11 +16,24 @@ const ImageGallery = ({ images, selectedImage, setSelectedImage, productName, en
         }
     };
 
+    const getImageUrl = (url) => {
+        if (!url) return 'https://placehold.co/800x600?text=No+Image';
+        if (url.startsWith('http')) return url;
+
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        try {
+            const urlObj = new URL(apiBase);
+            return `${urlObj.origin}${url}`;
+        } catch (e) {
+            return `http://localhost:8080${url}`;
+        }
+    };
+
     return (
         <div className="glass-panel p-3 rounded-4 mb-4">
             <div className="position-relative rounded-3 overflow-hidden" style={{ height: '500px' }}>
                 <Image
-                    src={selectedImage || 'https://placehold.co/800x600?text=No+Image'}
+                    src={getImageUrl(selectedImage)}
                     className="w-100 h-100 object-fit-cover"
                     alt={productName}
                 />
@@ -53,7 +66,7 @@ const ImageGallery = ({ images, selectedImage, setSelectedImage, productName, en
                                 onClick={() => setSelectedImage(img.image_url)}
                             >
                                 <Image
-                                    src={img.image_url}
+                                    src={getImageUrl(img.image_url)}
                                     className="w-100 h-100 object-fit-cover"
                                 />
                             </div>

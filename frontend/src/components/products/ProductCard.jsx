@@ -9,7 +9,35 @@ import BidRequestModal from './BidRequestModal';
 
 const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner, onUpdateDescription, showAdminActions, onRateWinner, onCancelTransaction }) => {
     const { name, current_price, images, end_date, bid_count, current_winner, buy_now_price, post_date, id } = product;
-    const imageUrl = images && images.length > 0 ? images[0].image_url : 'https://placehold.co/600x400?text=No+Image';
+
+    const getImageUrl = (img) => {
+        if (!img) {
+            // console.log('ProductCard: No image object provided');
+            return 'https://placehold.co/600x400?text=No+Image';
+        }
+        // console.log('ProductCard: Raw image data:', img);
+
+        if (img.image_url && img.image_url.startsWith('http')) {
+            // console.log('ProductCard: Using absolute URL:', img.image_url);
+            return img.image_url;
+        }
+
+        // Fix: VITE_API_BASE_URL might contain '/api', but uploads are served at root '/uploads'
+        // We need to extract the origin (scheme + domain + port)
+        const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+        try {
+            const urlObj = new URL(apiBase);
+            const origin = urlObj.origin; // http://localhost:8080
+            const finalUrl = `${origin}${img.image_url}`;
+            // console.log('ProductCard: Constructed URL:', finalUrl);
+            return finalUrl;
+        } catch (e) {
+            console.error('Error parsing API URL:', e);
+            return `http://localhost:8080${img.image_url}`;
+        }
+    };
+
+    const imageUrl = images && images.length > 0 ? getImageUrl(images[0]) : 'https://placehold.co/600x400?text=No+Image';
 
     const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
     const isWatched = isInWatchlist(id);
@@ -42,11 +70,19 @@ const ProductCard = ({ product, onWatchlistChange, onRateSeller, isOwner, onUpda
                     />
 
                     {/* New Badge */}
-                    {isNew(post_date) && (
-                        <div className="position-absolute top-0 start-0 p-2">
-                            <span className="badge badge-new shadow-sm">
-                                NEW
-                            </span>
+                    {/* Status Badges (NEW & Rank) */}
+                    {(isNew(post_date) || (product.user_rank && product.user_rank > 0)) && (
+                        <div className="position-absolute top-0 start-0 p-2 d-flex gap-2">
+                            {isNew(post_date) && (
+                                <span className="badge badge-new shadow-sm">
+                                    NEW
+                                </span>
+                            )}
+                            {product.user_rank > 0 && (
+                                <span className={`badge rank-badge rank-${product.user_rank > 3 ? 'other' : product.user_rank} fw-bold px-2 py-2 shadow-sm d-flex align-items-center gap-1`}>
+                                    #{product.user_rank}
+                                </span>
+                            )}
                         </div>
                     )}
 

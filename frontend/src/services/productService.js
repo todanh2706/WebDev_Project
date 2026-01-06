@@ -115,6 +115,12 @@ export const productService = {
         return response.data;
     },
 
+    updateFeedback: async (feedbackId, feedbackData) => {
+        const response = await api.put(`/feedbacks/${feedbackId}`, feedbackData);
+        return response.data;
+    },
+
+
     getBannedBidders: async (productId) => {
         const response = await api.get(`/products/${productId}/banned-bidders`);
         return response.data;
@@ -122,6 +128,11 @@ export const productService = {
 
     unbanBidder: async (productId, userId) => {
         const response = await api.delete(`/products/${productId}/banned-bidders/${userId}`);
+        return response.data;
+    },
+
+    appendDescription: async (id, description) => {
+        const response = await api.post(`/products/${id}/description`, { description });
         return response.data;
     }
 };

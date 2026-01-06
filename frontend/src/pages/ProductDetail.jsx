@@ -161,6 +161,19 @@ const ProductDetail = () => {
         }
     };
 
+    useEffect(() => {
+        if (product && user) {
+            const isEnded = new Date(product.end_date) < new Date();
+            // Redirect Winner or Seller to Order Completion logic
+            // Note: We check if status implies end or date is passed
+            if (isEnded || product.status === 'sold' || product.status === 'completed') {
+                if (product.current_winner_id === user.id || product.seller_id === user.id) {
+                    navigate(`/order-completion/${product.id}`);
+                }
+            }
+        }
+    }, [product, user, navigate]);
+
     if (loading) {
         return (
             <div className="min-vh-100 auction-bg-pattern d-flex justify-content-center align-items-center">
@@ -182,6 +195,8 @@ const ProductDetail = () => {
         );
     }
 
+    const isEnded = new Date(product.end_date) < new Date();
+
     return (
         <div className="min-vh-100 auction-bg-pattern py-5">
             <Container className="mt-5">
@@ -202,7 +217,7 @@ const ProductDetail = () => {
                             endDate={product.end_date}
                         />
 
-                        <div className="glass-panel p-4 rounded-4">
+                        <div className="glass-panel p-4 rounded-4 mt-4">
                             <h4 className="text-white fw-bold mb-3">Description</h4>
                             <div
                                 className="text-white-50 mb-0 description-container"
@@ -214,7 +229,7 @@ const ProductDetail = () => {
                         <BidHistory
                             productId={product.id}
                             isSeller={user && user.id === product.seller_id}
-                            isAuctionActive={product.status === 'active'}
+                            isAuctionActive={product.status === 'active' && !isEnded}
                             onRejectBid={(bidId) => {
                                 setBidToReject(bidId);
                                 setShowRejectModal(true);
@@ -225,17 +240,31 @@ const ProductDetail = () => {
 
                     {/* Product Info & Bidding */}
                     <Col lg={5}>
-                        <ProductInfo
-                            product={product}
-                            onPlaceBid={handlePlaceBidClick}
-                            isEligible={isEligible}
-                            permissionStatus={permissionStatus}
-                            onRequestPermission={handleRequestPermission}
-                            isOwner={user && user.id === product.seller_id}
-                            onShowBannedList={() => setShowBannedListModal(true)}
-                        />
+                        {isEnded ? (
+                            <div className="glass-panel p-4 rounded-4 text-center mb-4">
+                                <h2 className="text-danger fw-bold mb-3">PRODUCT HAS ENDED</h2>
+                                <p className="text-white-50">This auction has concluded.</p>
+                                {product.current_winner ? (
+                                    <div className="text-success fs-5">
+                                        Winner: <span className="fw-bold">{product.current_winner.name}</span>
+                                    </div>
+                                ) : (
+                                    <div className="text-white-50">No winner declared.</div>
+                                )}
+                            </div>
+                        ) : (
+                            <ProductInfo
+                                product={product}
+                                onPlaceBid={handlePlaceBidClick}
+                                isEligible={isEligible}
+                                permissionStatus={permissionStatus}
+                                onRequestPermission={handleRequestPermission}
+                                isOwner={user && user.id === product.seller_id}
+                                onShowBannedList={() => setShowBannedListModal(true)}
+                            />
+                        )}
 
-                        <div className="glass-panel p-4 rounded-4">
+                        <div className="glass-panel p-4 rounded-4 mt-4">
                             <h5 className="text-white fw-bold mb-3">Bidding Safety</h5>
                             <ul className="list-unstyled text-white-50 mb-0 d-flex flex-column gap-2">
                                 <li className="d-flex align-items-center gap-2">
@@ -285,5 +314,6 @@ const ProductDetail = () => {
         </div>
     );
 };
+
 
 export default ProductDetail;

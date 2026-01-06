@@ -56,7 +56,7 @@ export const sendCommentNotification = async (sellerEmail, sellerName, commenter
     }
 };
 
-export const sendAuctionWonEmail = async (winnerEmail, winnerName, productName, price) => {
+export const sendAuctionWonEmail = async (winnerEmail, winnerName, productName, price, productId) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: winnerEmail,
@@ -69,7 +69,7 @@ export const sendAuctionWonEmail = async (winnerEmail, winnerName, productName, 
                 <p>Winning Bid: <strong>$${price.toLocaleString()}</strong></p>
                 <p>Please log in to your account to view the seller's contact information and arrange for payment/delivery.</p>
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/won-products" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Won Products</a>
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/product/${productId}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Won Product</a>
                 </div>
             </div>
         `
@@ -153,7 +153,7 @@ export const sendBidSuccessEmail = async (bidderEmail, bidderName, productName, 
     }
 };
 
-export const sendOutbidEmail = async (bidderEmail, bidderName, productName, newPrice) => {
+export const sendOutbidEmail = async (bidderEmail, bidderName, productName, newPrice, productId) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: bidderEmail,
@@ -166,7 +166,7 @@ export const sendOutbidEmail = async (bidderEmail, bidderName, productName, newP
                 <p>Current Price: <strong>$${newPrice.toLocaleString()}</strong></p>
                 <p>Place a new bid now to reclaim your position!</p>
                 <div style="text-align: center; margin-top: 30px;">
-                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/products" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Bid Again</a>
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/product/${productId}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Bid Again</a>
                 </div>
             </div>
         `
@@ -250,5 +250,35 @@ export const sendReplyNotification = async (recipientEmail, recipientName, produ
     } catch (error) {
         // console.error('Error sending reply notification:', error);
         console.log(`Failed to send reply to ${recipientEmail}`);
+    }
+};
+
+export const sendProductUpdateEmail = async (bidderEmail, bidderName, productName, newDescription, productId) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: bidderEmail,
+        subject: `Product Update: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #007bff;">Product Description Updated</h2>
+                <p>Hello ${bidderName},</p>
+                <p>The seller has updated the description for <strong>${productName}</strong>.</p>
+                <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+                    <p style="margin: 0;"><strong>New Description Info:</strong></p>
+                    <div style="margin-top: 10px; white-space: pre-wrap;">${newDescription}</div>
+                </div>
+                <p>Please review the product page for full details.</p>
+                 <div style="text-align: center; margin-top: 30px;">
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/product/${productId}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Product</a>
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Product update email sent to ${bidderEmail}`);
+    } catch (error) {
+        console.error('Error sending product update email:', error);
     }
 };
