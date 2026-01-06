@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { Op } from 'sequelize';
 import db from '../models/index.js';
-import { sendAuctionWonEmail, sendAuctionSoldEmail } from './emailService.js';
+import { sendAuctionWonEmail, sendAuctionSoldEmail, sendAuctionEndedNoWinnerEmail } from './emailService.js';
 
 const { Products, Bid, Users } = db;
 
@@ -58,16 +58,16 @@ export const initAuctionCron = () => {
 
                     product.current_winner_id = winner.id;
                     product.status = 'sold';
-                    product.current_price = winningBid.amount;
+                    // product.current_price is already up-to-date from placeBid logic. Do not overwrite.
 
                     await product.save({ transaction: t });
 
                     // Send Emails
                     if (winner) {
-                        await sendAuctionWonEmail(winner.email, winner.name, product.name, winningBid.amount);
+                        await sendAuctionWonEmail(winner.email, winner.name, product.name, product.current_price);
                     }
                     if (product.seller) {
-                        await sendAuctionSoldEmail(product.seller.email, product.seller.name, product.name, winningBid.amount, winner ? winner.name : 'Unknown');
+                        await sendAuctionSoldEmail(product.seller.email, product.seller.name, product.name, product.current_price, winner ? winner.name : 'Unknown');
                     }
 
                     console.log(`Auction closed for ${product.id}. Winner: ${winner.id}`);
@@ -75,6 +75,11 @@ export const initAuctionCron = () => {
                     // No bids
                     product.status = 'expired';
                     await product.save({ transaction: t });
+
+                    if (product.seller) {
+                        await sendAuctionEndedNoWinnerEmail(product.seller.email, product.seller.name, product.name);
+                    }
+
                     console.log(`Auction expired for ${product.id} with no bids.`);
                 }
             }

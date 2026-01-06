@@ -1,4 +1,6 @@
 import db from '../models/index.js';
+import { sendKickedNotification, sendBidSuccessEmail, sendOutbidEmail, sendNewBidEmail } from '../services/emailService.js';
+import fs from 'fs';
 
 const Products = db.Products;
 const Bid = db.Bid;
@@ -8,8 +10,6 @@ const SystemSettings = db.SystemSettings;
 const BidPermissionRequest = db.BidPermissionRequest;
 const Feedbacks = db.Feedbacks;
 const BannedBidders = db.BannedBidders;
-import { sendKickedNotification } from '../services/emailService.js';
-import fs from 'fs';
 
 export default {
     getLatestBidded: async (req, res) => {
@@ -399,16 +399,23 @@ export default {
         const t = await db.sequelize.transaction();
         try {
             const { id } = req.params;
-            const { amount } = req.body; // This is the User's Bid
+            const { amount } = req.body; // This is the User's Bid (Max Bid in Auto, Bid Amount in Normal)
             const userId = req.user.id;
 
-            const product = await Products.findByPk(id, { lock: true, transaction: t });
+            const product = await Products.findByPk(id, {
+                lock: true,
+                transaction: t,
+                include: [{ model: db.Users, as: 'seller', attributes: ['email', 'name'], required: true }]
+            });
 
             if (!product) {
                 await t.rollback();
                 return res.status(404).json({ message: 'Product not found' });
             }
 
+            const previousWinnerId = product.current_winner_id;
+
+            // Check if user is banned
             const isBanned = await BannedBidders.findOne({
                 where: { user_id: userId, product_id: id },
                 transaction: t
@@ -447,6 +454,7 @@ export default {
                 }
             }
 
+            // Get System Setting for Bidding Mode
             let biddingMode = 'AUTO';
             const setting = await SystemSettings.findOne({ where: { key: 'BIDDING_MODE' } });
             if (setting) {
@@ -536,7 +544,6 @@ export default {
 
                 } else {
                     // Competition
-                    // Price is ALWAYS RunnerUp + Step (Capped at Winner Max)
                     newCurrentPrice = runnerUp.amount + stepPrice;
 
                     if (newCurrentPrice > winner.amount) {
@@ -545,8 +552,7 @@ export default {
 
                     // Logic for Recording Bids
                     if (newWinnerId === userId) {
-                        // User Won (Overtake or First/Solo)
-                        // Record User's Bid at Calculated Price
+                        // User Won
                         await Bid.create({
                             bidder_id: userId,
                             product_id: id,
@@ -556,25 +562,21 @@ export default {
                         }, { transaction: t });
                     } else {
                         // User Lost (Defense triggered)
-                        // 1. Record User's Bid at their Max (since they were pushed to limit)
-                        // Or should it be RunnerUp Amount?
-                        // If I bid 1600, and price goes to 1650.
-                        // My bid at 1600 should be visible.
                         await Bid.create({
                             bidder_id: userId,
                             product_id: id,
-                            amount: userBidAmount, // They bid 1600, they essentially offered 1600
+                            amount: userBidAmount,
                             max_bid_amount: userBidAmount,
                             bid_time: new Date()
                         }, { transaction: t });
 
-                        // 2. Record Auto-Bid for Winner
+                        // Record Auto-Bid for Winner
                         await Bid.create({
                             bidder_id: winner.userId,
                             product_id: id,
-                            amount: newCurrentPrice, // 1650
-                            max_bid_amount: winner.amount, // 2000
-                            bid_time: new Date() // Technically slight delay but essentially same transaction
+                            amount: newCurrentPrice,
+                            max_bid_amount: winner.amount,
+                            bid_time: new Date()
                         }, { transaction: t });
                     }
                 }
@@ -601,6 +603,32 @@ export default {
             await product.update(updateData, { transaction: t });
 
             await t.commit();
+
+            // --- Send Emails ---
+            try {
+                // 1. Success Email to Bidder
+                const bidderEmail = req.user.email || 'user@example.com'; // Fallback if not in req.user, though auth usually provides it
+                const bidderName = req.user.name || 'Bidder';
+                await sendBidSuccessEmail(bidderEmail, bidderName, product.name, userBidAmount);
+
+                // 2. New Bid Email to Seller
+                const seller = product.seller;
+                if (seller) {
+                    await sendNewBidEmail(seller.email, seller.name, product.name, userBidAmount, bidderName);
+                }
+
+                // 3. Outbid Email to Previous Winner
+                if (previousWinnerId && previousWinnerId !== userId && previousWinnerId !== newWinnerId) {
+                    // Fetch previous winner email
+                    const prevWinner = await db.Users.findByPk(previousWinnerId);
+                    if (prevWinner) {
+                        await sendOutbidEmail(prevWinner.email, prevWinner.name, product.name, newCurrentPrice);
+                    }
+                }
+            } catch (emailErr) {
+                console.error('Email error:', emailErr);
+            }
+            // -------------------
 
             if (biddingMode === 'AUTO' && newWinnerId !== userId) {
                 return res.json({ message: 'Bid placed, but you were outbidded by an automatic bid!', outbidded: true, current_price: newCurrentPrice });

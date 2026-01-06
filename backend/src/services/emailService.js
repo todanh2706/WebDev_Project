@@ -128,3 +128,127 @@ export const sendKickedNotification = async (email, productName) => {
         console.error('Error sending kicked email:', error);
     }
 };
+
+export const sendBidSuccessEmail = async (bidderEmail, bidderName, productName, bidAmount) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: bidderEmail,
+        subject: `Bid Placed Successfully: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #28a745;">Bid Placed!</h2>
+                <p>Hello ${bidderName},</p>
+                <p>You have successfully placed a bid on <strong>${productName}</strong>.</p>
+                <p>Your Bid: <strong>$${bidAmount.toLocaleString()}</strong></p>
+                <p>We will notify you if you are outbid or if you win the auction.</p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Bid success email sent to ${bidderEmail}`);
+    } catch (error) {
+        console.error('Error sending bid success email:', error);
+    }
+};
+
+export const sendOutbidEmail = async (bidderEmail, bidderName, productName, newPrice) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: bidderEmail,
+        subject: `You have been outbid: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #dc3545;">You've been outbid!</h2>
+                <p>Hello ${bidderName},</p>
+                <p>Another user has placed a higher bid on <strong>${productName}</strong>.</p>
+                <p>Current Price: <strong>$${newPrice.toLocaleString()}</strong></p>
+                <p>Place a new bid now to reclaim your position!</p>
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/products" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Bid Again</a>
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Outbid email sent to ${bidderEmail}`);
+    } catch (error) {
+        console.error('Error sending outbid email:', error);
+    }
+};
+
+export const sendNewBidEmail = async (sellerEmail, sellerName, productName, bidAmount, bidderName) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: sellerEmail,
+        subject: `New Bid on your product: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #007bff;">New Bid Received!</h2>
+                <p>Hello ${sellerName},</p>
+                <p>Your product <strong>${productName}</strong> has received a new bid.</p>
+                <p>Bidder: <strong>${bidderName}</strong></p>
+                <p>Amount: <strong>$${bidAmount.toLocaleString()}</strong></p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`New bid email sent to ${sellerEmail}`);
+    } catch (error) {
+        console.error('Error sending new bid email:', error);
+    }
+};
+
+export const sendAuctionEndedNoWinnerEmail = async (sellerEmail, sellerName, productName) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: sellerEmail,
+        subject: `Auction Ended (No Bids): ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #6c757d;">Auction Ended</h2>
+                <p>Hello ${sellerName},</p>
+                <p>The auction for <strong>${productName}</strong> has ended with no bids.</p>
+                <p>You may choose to relist the item.</p>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`No winner email sent to ${sellerEmail}`);
+    } catch (error) {
+        console.error('Error sending no winner email:', error);
+    }
+};
+
+export const sendReplyNotification = async (recipientEmail, recipientName, productName, replyContent) => {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: recipientEmail,
+        subject: `Seller replied to a question on: ${productName}`,
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #007bff;">New Reply from Seller</h2>
+                <p>Hello ${recipientName},</p>
+                <p>The seller has replied to a question on <strong>${productName}</strong>.</p>
+                <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #007bff; margin: 20px 0;">
+                    <p style="margin: 0; font-style: italic;">"${replyContent}"</p>
+                </div>
+            </div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Reply notification sent to ${recipientEmail}`);
+    } catch (error) {
+        // console.error('Error sending reply notification:', error);
+        console.log(`Failed to send reply to ${recipientEmail}`);
+    }
+};

@@ -1,9 +1,10 @@
 import db from '../models/index.js';
-import { sendCommentNotification } from '../services/emailService.js';
+import { sendCommentNotification, sendReplyNotification } from '../services/emailService.js';
 
 const Comment = db.Comment;
 const User = db.Users;
 const Product = db.Products;
+const Bid = db.Bid;
 
 export default {
     getComments: async (req, res) => {
@@ -72,9 +73,43 @@ export default {
                 });
 
                 if (product && product.seller) {
-                    // Check if commenter is not the seller
-                    if (product.seller.id !== userId) {
-                        const commenterName = req.user.name || 'A user'; // Assuming req.user has name from auth middleware
+                    // Check if commenter is the seller (Reply Scenario)
+                    if (product.seller.id === userId) {
+                        // Seller is replying. Notify all interested users (bidders + commenters)
+                        const interestedUsers = new Set();
+
+                        // 1. Get Bidders
+                        const bidders = await Bid.findAll({
+                            where: { product_id: id },
+                            include: [{ model: User, as: 'bidder', attributes: ['email'] }]
+                        });
+                        bidders.forEach(b => {
+                            if (b.bidder && b.bidder.email) interestedUsers.add(b.bidder.email);
+                        });
+
+                        // 2. Get Commenters
+                        const commenters = await Comment.findAll({
+                            where: { product_id: id },
+                            include: [{ model: User, as: 'user', attributes: ['email'] }]
+                        });
+                        commenters.forEach(c => {
+                            if (c.user && c.user.email) interestedUsers.add(c.user.email);
+                        });
+
+                        // Remove seller's own email if present (though checking userId vs sellerId handles source, 
+                        // but if seller bid on own product impossible, but assuming safe set ops)
+                        if (interestedUsers.has(product.seller.email)) {
+                            interestedUsers.delete(product.seller.email);
+                        }
+
+                        // Send Emails
+                        for (const email of interestedUsers) {
+                            await sendReplyNotification(email, product.name, content.trim());
+                        }
+
+                    } else {
+                        // Regular user commenting. Notify Seller.
+                        const commenterName = req.user.name || 'A user';
                         await sendCommentNotification(
                             product.seller.email,
                             product.seller.name,
